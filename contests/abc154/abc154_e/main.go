@@ -11,7 +11,38 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, k := next(), nextInt()
+	d := len(n)
+	dp := make([][][]int, d)
+	for i := 0; i < d; i++ {
+		dp[i] = make([][]int, 2)
+		for j := 0; j < 2; j++ {
+			dp[i][j] = make([]int, k+1)
+		}
+	}
+	dp[0][1][0] = 1
+	dp[0][0][1] = 1
+	if int(n[0]-'0') > 1 {
+		dp[0][1][1] = int(n[0]-'0') - 1
+	}
+	for i := 0; i < d-1; i++ {
+		for h := 0; h <= k; h++ {
+			dp[i+1][1][h] += dp[i][1][h]
+			if h != k {
+				dp[i+1][1][h+1] += dp[i][1][h] * 9
+			}
+			if int(n[i+1]-'0') != 0 {
+				if h != k {
+					dp[i+1][1][h+1] += dp[i][0][h] * (int(n[i+1]-'0') - 1)
+					dp[i+1][0][h+1] += dp[i][0][h]
+				}
+				dp[i+1][1][h] += dp[i][0][h]
+			} else {
+				dp[i+1][0][h] += dp[i][0][h]
+			}
+		}
+	}
+	out.Println(dp[d-1][0][k] + dp[d-1][1][k])
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -169,6 +200,30 @@ func minOfInts(a []int) int {
 	res := MaxInt
 	for _, v := range a {
 		res = min(res, v)
+	}
+	return res
+}
+
+func uniqueInts(a []int) []int {
+	m := make(map[int]bool)
+	res := make([]int, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
+func uniqueStrings(a []string) []string {
+	m := make(map[string]bool)
+	res := make([]string, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
 	}
 	return res
 }

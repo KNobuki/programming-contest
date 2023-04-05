@@ -173,6 +173,30 @@ func minOfInts(a []int) int {
 	return res
 }
 
+func uniqueInts(a []int) []int {
+	m := make(map[int]bool)
+	res := make([]int, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
+func uniqueStrings(a []string) []string {
+	m := make(map[string]bool)
+	res := make([]string, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
 func abs(n int) int {
 	if n < 0 {
 		return -n

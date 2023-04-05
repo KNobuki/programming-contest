@@ -11,7 +11,26 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	s := nexts(n)
+	ans := make([]int, 26)
+	for _, v := range s[0] {
+		ans[v-'a']++
+	}
+	for i := 1; i < n; i++ {
+		cnt := make([]int, 26)
+		for _, v := range s[i] {
+			cnt[v-'a']++
+		}
+		for j := 0; j < 26; j++ {
+			ans[j] = min(ans[j], cnt[j])
+		}
+	}
+	for i := 0; i < 26; i++ {
+		for j := 0; j < ans[i]; j++ {
+			out.Printf("%c", i+'a')
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -169,6 +188,30 @@ func minOfInts(a []int) int {
 	res := MaxInt
 	for _, v := range a {
 		res = min(res, v)
+	}
+	return res
+}
+
+func uniqueInts(a []int) []int {
+	m := make(map[int]bool)
+	res := make([]int, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
+func uniqueStrings(a []string) []string {
+	m := make(map[string]bool)
+	res := make([]string, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
 	}
 	return res
 }

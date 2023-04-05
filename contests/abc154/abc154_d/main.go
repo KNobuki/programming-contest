@@ -11,14 +11,7 @@ import (
 
 // 解答欄
 func solve() {
-	w, n := nextInt2()
-	seg := NewSegmentTree(w)
-	for i := 0; i < n; i++ {
-		l, r := nextInt2()
-		h := seg.rangeMax(l-1, r, 1, 0, seg.sz) + 1
-		seg.update(l-1, r, h, 1, 0, seg.sz)
-		out.Println(h)
-	}
+
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -115,6 +108,15 @@ func nexts(n int) []string {
 func nextInt() int {
 	in.Scan()
 	ret, e := strconv.Atoi(in.Text())
+	if e != nil {
+		panic(e)
+	}
+	return ret
+}
+
+func nextFloat() float64 {
+	in.Scan()
+	ret, e := strconv.ParseFloat(in.Text(), 64)
 	if e != nil {
 		panic(e)
 	}
@@ -251,15 +253,30 @@ func primeFact(x int) map[int]int {
 	return ret
 }
 
+func divisor(x int) []int {
+	ret := make([]int, 0, x)
+	for i := 1; i*i <= x; i++ {
+		if x%i == 0 {
+			ret = append(ret, i)
+			if x/i != i {
+				ret = append(ret, x/i)
+			}
+		}
+	}
+	return ret
+}
+
 type Dsu struct {
 	n            int
 	parentOrSize []int
+	edgeNum      []int
 }
 
 func NewDsu(n int) *Dsu {
 	d := &Dsu{
 		n:            n,
 		parentOrSize: make([]int, n),
+		edgeNum:      make([]int, n),
 	}
 	for i := range d.parentOrSize {
 		d.parentOrSize[i] = -1
@@ -276,6 +293,7 @@ func (d *Dsu) Merge(a, b int) int {
 	}
 	x, y := d.Leader(a), d.Leader(b)
 	if x == y {
+		d.edgeNum[x]++
 		return x
 	}
 	if -d.parentOrSize[x] < -d.parentOrSize[y] {
@@ -283,6 +301,7 @@ func (d *Dsu) Merge(a, b int) int {
 	}
 	d.parentOrSize[x] += d.parentOrSize[y]
 	d.parentOrSize[y] = x
+	d.edgeNum[x] += d.edgeNum[y] + 1
 	return x
 }
 
@@ -312,6 +331,13 @@ func (d *Dsu) Size(a int) int {
 		panic("")
 	}
 	return -d.parentOrSize[d.Leader(a)]
+}
+
+func (d *Dsu) EdgeNum(a int) int {
+	if !(0 <= a && a < d.n) {
+		panic("")
+	}
+	return d.edgeNum[d.Leader(a)]
 }
 
 func (d *Dsu) Groups() [][]int {
@@ -351,7 +377,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
-		{To: start, Weight: 0},
+		{To: start, Weight: 0, idx: -1},
 	}
 	heap.Init(h)
 	// ダイクストラ法
@@ -362,12 +388,18 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	for h.Len() > 0 {
 		// ヒープからキュー取得
 		edge := heap.Pop(h).(Edge)
-
 		// 次に確定させるべき頂点を求める
 		position := edge.To
 		// すでに最短距離が確定している場合
 		if confirm[position] {
 			continue
+		}
+		// 距離の最新値と異なる場合
+		if dist[position] != edge.Weight {
+			continue
+		}
+		if edge.idx != -1 {
+			out.Printf("%d ", edge.idx)
 		}
 
 		// 最短距離確定を更新する
@@ -381,7 +413,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 				// 最短距離リスト更新
 				dist[to] = weight
 				// 確定候補キューに格納
-				heap.Push(h, Edge{Weight: dist[to], To: to})
+				heap.Push(h, Edge{Weight: dist[to], To: to, idx: p.idx})
 			}
 		}
 	}
@@ -421,6 +453,10 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 		position := edge.To
 		// すでに最短距離が確定している場合
 		if confirm[position] {
+			continue
+		}
+		// 距離の最新値と異なる場合
+		if dist[position] != edge.Weight {
 			continue
 		}
 
@@ -505,6 +541,7 @@ func minv(a int) int {
 func mdiv(a, b int) int {
 	return ((a % mod) * minv(b)) % mod
 }
+
 func mpow(a, n int) int {
 	res := 1
 	for n > 0 {
@@ -562,57 +599,23 @@ func (h *IntHeap) Pop() interface{} {
 	return x
 }
 
-type segmentTree struct {
-	sz   int
-	seg  []int
-	lazy []int
+func NewIntArray(n, init int) []int {
+	ret := make([]int, n)
+	for i := 0; i < n; i++ {
+		ret[i] = init
+	}
+	return ret
 }
 
-func NewSegmentTree(n int) *segmentTree {
-	sz := 1
-	for sz < n {
-		sz *= 2
+func New2DIntArray(n, m, init int) [][]int {
+	ret := make([][]int, n)
+	for i := 0; i < n; i++ {
+		ret[i] = make([]int, m)
+		for j := 0; j < m; j++ {
+			ret[i][j] = init
+		}
 	}
-	return &segmentTree{
-		sz:   sz,
-		seg:  make([]int, sz*2),
-		lazy: make([]int, sz*2),
-	}
-}
-
-func (s *segmentTree) push(k int) {
-	if k < s.sz {
-		s.lazy[k*2] = max(s.lazy[k*2], s.lazy[k])
-		s.lazy[k*2+1] = max(s.lazy[k*2+1], s.lazy[k])
-	}
-	s.seg[k] = max(s.seg[k], s.lazy[k])
-	s.lazy[k] = 0
-}
-
-func (s *segmentTree) update(a, b, x, k, l, r int) {
-	s.push(k)
-	if r <= a || b <= l {
-		return
-	}
-	if a <= l && r <= b {
-		s.lazy[k] = x
-		s.push(k)
-		return
-	}
-	s.update(a, b, x, k*2, l, (l+r)>>1)
-	s.update(a, b, x, k*2+1, (l+r)>>1, r)
-	s.seg[k] = max(s.seg[k*2], s.seg[k*2+1])
-}
-
-func (s *segmentTree) rangeMax(a, b, k, l, r int) int {
-	s.push(k)
-	if r <= a || b <= l {
-		return 0
-	}
-	if a <= l && r <= b {
-		return s.seg[k]
-	}
-	return max(s.rangeMax(a, b, k*2, l, (l+r)>>1), s.rangeMax(a, b, k*2+1, (l+r)>>1, r))
+	return ret
 }
 
 func init() {
