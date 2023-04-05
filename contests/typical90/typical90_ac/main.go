@@ -5,12 +5,36 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
+	_, n := nextInt2()
+	l := make([]int, n)
+	r := make([]int, n)
+	a := make([]int, 0, 2*n)
+	for i := 0; i < n; i++ {
+		l[i], r[i] = nextInt2()
+		a = append(a, l[i], r[i])
+	}
+	b := uniqueInts(a)
+	sort.Ints(b)
+	bm := make(map[int]int)
+	for i := 0; i < len(b); i++ {
+		bm[b[i]] = i
+	}
+	h := make([]int, 2*n+1)
+	for i := 0; i < n; i++ {
+		l[i], r[i] = bm[l[i]], bm[r[i]]
+		max := maxOfInts(h[l[i] : r[i]+1])
+		for j := l[i]; j <= r[i]; j++ {
+			h[j] = max + 1
+		}
+		out.Println(max + 1)
+	}
 
 }
 
@@ -160,6 +184,30 @@ func minOfInts(a []int) int {
 	res := MaxInt
 	for _, v := range a {
 		res = min(res, v)
+	}
+	return res
+}
+
+func uniqueInts(a []int) []int {
+	m := make(map[int]bool)
+	res := make([]int, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
+func uniqueStrings(a []string) []string {
+	m := make(map[string]bool)
+	res := make([]string, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
 	}
 	return res
 }
