@@ -12,19 +12,44 @@ import (
 // 解答欄
 func solve() {
 	n, k := nextInt2()
-	cnt := make([]int, n+1)
-	for i := 2; i <= n; i++ {
-		if cnt[i] >= 1 {
-			continue
-		}
-		for j := i; j <= n; j += i {
-			cnt[j]++
-		}
+	x, y := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		x[i], y[i] = nextInt2()
+	}
+	if k == 1 {
+		out.Println("Infinity")
+		return
+	}
+	seen := make([][]bool, n)
+	for i := 0; i < n; i++ {
+		seen[i] = make([]bool, n)
 	}
 	ans := 0
-	for i := 2; i <= n; i++ {
-		if cnt[i] >= k {
-			ans++
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			cnt := 2
+			if seen[i][j] {
+				continue
+			}
+			list := make([]int, 0, n)
+			list = append(list, i)
+			list = append(list, j)
+			for h := j + 1; h < n; h++ {
+				dx1, dx2 := x[i]-x[j], x[i]-x[h]
+				dy1, dy2 := y[i]-y[j], y[i]-y[h]
+				if dx2*dy1 == dx1*dy2 {
+					cnt++
+					list = append(list, h)
+				}
+			}
+			if cnt >= k {
+				ans++
+			}
+			for h := 0; h < len(list); h++ {
+				for l := h + 1; l < len(list); l++ {
+					seen[list[h]][list[l]] = true
+				}
+			}
 		}
 	}
 	out.Println(ans)
@@ -130,6 +155,15 @@ func nextInt() int {
 	return ret
 }
 
+func nextFloat() float64 {
+	in.Scan()
+	ret, e := strconv.ParseFloat(in.Text(), 64)
+	if e != nil {
+		panic(e)
+	}
+	return ret
+}
+
 func nextInt2() (int, int) {
 	return nextInt(), nextInt()
 }
@@ -176,6 +210,30 @@ func minOfInts(a []int) int {
 	res := MaxInt
 	for _, v := range a {
 		res = min(res, v)
+	}
+	return res
+}
+
+func uniqueInts(a []int) []int {
+	m := make(map[int]bool)
+	res := make([]int, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
+func uniqueStrings(a []string) []string {
+	m := make(map[string]bool)
+	res := make([]string, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
 	}
 	return res
 }
@@ -236,15 +294,30 @@ func primeFact(x int) map[int]int {
 	return ret
 }
 
+func divisor(x int) []int {
+	ret := make([]int, 0, x)
+	for i := 1; i*i <= x; i++ {
+		if x%i == 0 {
+			ret = append(ret, i)
+			if x/i != i {
+				ret = append(ret, x/i)
+			}
+		}
+	}
+	return ret
+}
+
 type Dsu struct {
 	n            int
 	parentOrSize []int
+	edgeNum      []int
 }
 
 func NewDsu(n int) *Dsu {
 	d := &Dsu{
 		n:            n,
 		parentOrSize: make([]int, n),
+		edgeNum:      make([]int, n),
 	}
 	for i := range d.parentOrSize {
 		d.parentOrSize[i] = -1
@@ -261,6 +334,7 @@ func (d *Dsu) Merge(a, b int) int {
 	}
 	x, y := d.Leader(a), d.Leader(b)
 	if x == y {
+		d.edgeNum[x]++
 		return x
 	}
 	if -d.parentOrSize[x] < -d.parentOrSize[y] {
@@ -268,6 +342,7 @@ func (d *Dsu) Merge(a, b int) int {
 	}
 	d.parentOrSize[x] += d.parentOrSize[y]
 	d.parentOrSize[y] = x
+	d.edgeNum[x] += d.edgeNum[y] + 1
 	return x
 }
 
@@ -297,6 +372,13 @@ func (d *Dsu) Size(a int) int {
 		panic("")
 	}
 	return -d.parentOrSize[d.Leader(a)]
+}
+
+func (d *Dsu) EdgeNum(a int) int {
+	if !(0 <= a && a < d.n) {
+		panic("")
+	}
+	return d.edgeNum[d.Leader(a)]
 }
 
 func (d *Dsu) Groups() [][]int {
@@ -336,7 +418,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
-		{To: start, Weight: 0},
+		{To: start, Weight: 0, idx: -1},
 	}
 	heap.Init(h)
 	// ダイクストラ法
@@ -347,12 +429,18 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	for h.Len() > 0 {
 		// ヒープからキュー取得
 		edge := heap.Pop(h).(Edge)
-
 		// 次に確定させるべき頂点を求める
 		position := edge.To
 		// すでに最短距離が確定している場合
 		if confirm[position] {
 			continue
+		}
+		// 距離の最新値と異なる場合
+		if dist[position] != edge.Weight {
+			continue
+		}
+		if edge.idx != -1 {
+			out.Printf("%d ", edge.idx)
 		}
 
 		// 最短距離確定を更新する
@@ -366,7 +454,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 				// 最短距離リスト更新
 				dist[to] = weight
 				// 確定候補キューに格納
-				heap.Push(h, Edge{Weight: dist[to], To: to})
+				heap.Push(h, Edge{Weight: dist[to], To: to, idx: p.idx})
 			}
 		}
 	}
@@ -406,6 +494,10 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 		position := edge.To
 		// すでに最短距離が確定している場合
 		if confirm[position] {
+			continue
+		}
+		// 距離の最新値と異なる場合
+		if dist[position] != edge.Weight {
 			continue
 		}
 
@@ -490,6 +582,7 @@ func minv(a int) int {
 func mdiv(a, b int) int {
 	return ((a % mod) * minv(b)) % mod
 }
+
 func mpow(a, n int) int {
 	res := 1
 	for n > 0 {
@@ -545,6 +638,25 @@ func (h *IntHeap) Pop() interface{} {
 	x := old[n-1]
 	*h = old[0 : n-1]
 	return x
+}
+
+func NewIntArray(n, init int) []int {
+	ret := make([]int, n)
+	for i := 0; i < n; i++ {
+		ret[i] = init
+	}
+	return ret
+}
+
+func New2DIntArray(n, m, init int) [][]int {
+	ret := make([][]int, n)
+	for i := 0; i < n; i++ {
+		ret[i] = make([]int, m)
+		for j := 0; j < m; j++ {
+			ret[i][j] = init
+		}
+	}
+	return ret
 }
 
 func init() {
