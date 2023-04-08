@@ -11,7 +11,47 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	a := make([][]int, n)
+	for i := 0; i < n; i++ {
+		a[i] = nextInts(n)
+	}
+	m := nextInt()
+	xy := make([][]bool, n)
+	for i := 0; i < n; i++ {
+		xy[i] = make([]bool, n)
+	}
+	for i := 0; i < m; i++ {
+		x, y := nextInt()-1, nextInt()-1
+		xy[x][y] = true
+		xy[y][x] = true
+	}
+	r := make([]int, n)
+	for i := 0; i < n; i++ {
+		r[i] = i
+	}
+	ans := MaxInt
+	for next := true; next; next = nextPermutation(r) {
+		pre := n
+		flag := true
+		sum := 0
+		for i, vv := range r {
+			if pre != n && xy[pre][vv] {
+				flag = false
+				break
+			}
+			sum += a[vv][i]
+			pre = vv
+		}
+		if flag {
+			ans = min(ans, sum)
+		}
+	}
+	if ans == MaxInt {
+		out.Println(-1)
+	} else {
+		out.Println(ans)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -529,6 +569,30 @@ func (h *IntHeap) Pop() interface{} {
 	x := old[n-1]
 	*h = old[0 : n-1]
 	return x
+}
+
+func nextPermutation(aa []int) bool {
+	n := len(aa)
+	l := n - 2
+	for l >= 0 && aa[l] > aa[l+1] {
+		l--
+	}
+	if l < 0 {
+		return false
+	}
+	r := n - 1
+	for l < r && aa[l] > aa[r] {
+		r--
+	}
+	aa[l], aa[r] = aa[r], aa[l]
+	l++
+	r = n - 1
+	for l < r {
+		aa[l], aa[r] = aa[r], aa[l]
+		l++
+		r--
+	}
+	return true
 }
 
 func init() {

@@ -11,7 +11,48 @@ import (
 
 // 解答欄
 func solve() {
-
+	h, w := nextInt2()
+	s := nexts(h)
+	x := make([][]int, h)
+	y := make([][]int, h)
+	z := make([][]int, h)
+	dp := make([][]int, h)
+	for i := 0; i < h; i++ {
+		x[i] = make([]int, w)
+		y[i] = make([]int, w)
+		z[i] = make([]int, w)
+		dp[i] = make([]int, w)
+	}
+	dp[0][0] = 1
+	x[0][0] = 1
+	y[0][0] = 1
+	z[0][0] = 1
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if i == 0 && j == 0 {
+				continue
+			}
+			if s[i][j] == '#' {
+				continue
+			}
+			if j > 0 {
+				dp[i][j] = madd(dp[i][j], x[i][j-1])
+				x[i][j] = x[i][j-1]
+			}
+			if i > 0 {
+				dp[i][j] = madd(dp[i][j], y[i-1][j])
+				y[i][j] = y[i-1][j]
+			}
+			if i > 0 && j > 0 {
+				dp[i][j] = madd(dp[i][j], z[i-1][j-1])
+				z[i][j] = z[i-1][j-1]
+			}
+			x[i][j] = madd(x[i][j], dp[i][j])
+			y[i][j] = madd(y[i][j], dp[i][j])
+			z[i][j] = madd(z[i][j], dp[i][j])
+		}
+	}
+	out.Println(dp[h-1][w-1])
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -640,112 +681,6 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
-}
-
-type SegTreeLazy struct {
-	Size int
-	Ex   X  // identity element in monoid X
-	Em   M  // identity element in monoid M
-	Fx   FX // binary operation in monoid X
-	Fm   FM // binary operation in monoid M
-	Fa   FA // binary operation between X and M
-	Dat  []X
-	Lazy []M
-}
-
-type X struct {
-	val int
-}
-type M struct {
-	val int
-}
-type FX func(a, b X) X
-type FM func(a, b M) M
-type FA func(a X, b M) X
-
-func NewSegTreeLazy(n int, ex X, em M, fx FX, fm FM, fa FA) *SegTreeLazy {
-	sg := &SegTreeLazy{
-		Size: 1,
-		Fx:   fx,
-		Fm:   fm,
-		Fa:   fa,
-		Ex:   ex,
-		Em:   em,
-	}
-
-	for sg.Size < n {
-		sg.Size *= 2
-	}
-	sg.Dat = make([]X, 2*sg.Size)
-	for i := range sg.Dat {
-		sg.Dat[i] = sg.Ex
-	}
-	sg.Lazy = make([]M, 2*sg.Size)
-	for i := range sg.Lazy {
-		sg.Lazy[i] = sg.Em
-	}
-	return sg
-}
-
-// Set and Build used for bulk construction in O(n)
-func (sg *SegTreeLazy) Set(k int, x X) {
-	sg.Dat[k+sg.Size-1] = x
-}
-func (sg *SegTreeLazy) Build() {
-	for k := sg.Size - 2; k >= 0; k-- {
-		sg.Dat[k] = sg.Fx(sg.Dat[2*k+1], sg.Dat[2*k+2])
-	}
-}
-
-// Eval propagates the lazy data
-func (sg *SegTreeLazy) Eval(k int) {
-	if sg.Lazy[k] == sg.Em {
-		return
-	}
-
-	// propagate k-th lazy to its children
-	if k < sg.Size-1 {
-		sg.Lazy[2*k+1] = sg.Fm(sg.Lazy[2*k+1], sg.Lazy[k])
-		sg.Lazy[2*k+2] = sg.Fm(sg.Lazy[2*k+2], sg.Lazy[k])
-	}
-	// update itself
-	sg.Dat[k] = sg.Fa(sg.Dat[k], sg.Lazy[k])
-	sg.Lazy[k] = sg.Em
-}
-
-func (sg *SegTreeLazy) update(a, b int, x M, k, l, r int) {
-	sg.Eval(k)
-	if a <= l && r <= b {
-		sg.Lazy[k] = sg.Fm(sg.Lazy[k], x)
-		sg.Eval(k)
-	} else if a < r && l < b {
-		sg.update(a, b, x, 2*k+1, l, (l+r)/2)
-		sg.update(a, b, x, 2*k+2, (l+r)/2, r)
-		sg.Dat[k] = sg.Fx(sg.Dat[2*k+1], sg.Dat[2*k+2])
-	}
-}
-
-// Update updates [a, b) to x
-func (sg *SegTreeLazy) Update(a, b int, x M) {
-	sg.update(a, b, x, 0, 0, sg.Size)
-}
-
-func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
-	sg.Eval(k)
-	if r <= a || b <= l {
-		return sg.Ex
-	}
-	if a <= l && r <= b {
-		return sg.Dat[k]
-	}
-	vl := sg.query(a, b, 2*k+1, l, (l+r)/2)
-	vr := sg.query(a, b, 2*k+2, (l+r)/2, r)
-	return sg.Fx(vl, vr)
-}
-
-// Query returns the query result in [a, b)
-func (sg *SegTreeLazy) Query(a, b int) X {
-	return sg.query(a, b, 0, 0, sg.Size)
 }
 
 func init() {
