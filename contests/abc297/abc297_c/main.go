@@ -11,25 +11,10 @@ import (
 
 // 解答欄
 func solve() {
-	h, w := nextInt2()
+	h, _ := nextInt2()
 	s := nexts(h)
-	ans := make([][]byte, h)
-	for i := 0; i < h; i++ {
-		ans[i] = make([]byte, w)
-	}
-	for i, v := range s {
-		for j := 0; j < len(v); j++ {
-			if j < len(v)-1 && v[j] == 'T' && v[j+1] == 'T' {
-				ans[i][j] = 'P'
-				ans[i][j+1] = 'C'
-				j++
-				continue
-			}
-			ans[i][j] = v[j]
-		}
-	}
-	for _, v := range ans {
-		out.Println(string(v))
+	for _, v := range s {
+		out.Println(strings.ReplaceAll(v, "TT", "PC"))
 	}
 }
 

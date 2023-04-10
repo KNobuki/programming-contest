@@ -12,25 +12,12 @@ import (
 // 解答欄
 func solve() {
 	s := next()
-	b := make([]int, 0, 2)
-	r := make([]int, 0, 2)
-	k := -1
-	for i, v := range s {
-		if v == 'B' {
-			b = append(b, i)
-		}
-		if v == 'R' {
-			r = append(r, i)
-		}
-		if v == 'K' {
-			k = i
-		}
-	}
-	if b[0]%2 == b[1]%2 {
+	if strings.Index(s, "B")%2 == strings.LastIndex(s, "B")%2 {
 		out.YesNo(false)
 		return
 	}
-	if k < r[0] || k > r[1] {
+	k := strings.Index(s, "K")
+	if k < strings.Index(s, "R") || k > strings.LastIndex(s, "R") {
 		out.YesNo(false)
 		return
 	}

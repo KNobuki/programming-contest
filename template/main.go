@@ -5,13 +5,20 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	s := []string{"test", "test3", "test2", "test5"}
+	sort.Strings(s)
+	i := sort.Search(len(s), func(i int) bool {
+		return "test3" <= s[i]
+	})
+	out.Println(s)
+	out.Println(i)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -618,6 +625,8 @@ func New2DIntArray(n, m, init int) [][]int {
 	return ret
 }
 
+// nextPermutation
+// example: for next := true; next; next = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
