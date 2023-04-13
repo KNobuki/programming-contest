@@ -11,7 +11,13 @@ import (
 
 // 解答欄
 func solve() {
-
+	a, b := nextInt2()
+	c := a / gcd(a, b)
+	if b <= 1e18/c {
+		out.Println(c * b)
+	} else {
+		out.Println("Large")
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
