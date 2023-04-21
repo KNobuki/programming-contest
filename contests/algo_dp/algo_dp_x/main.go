@@ -11,7 +11,34 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := nextInt2()
+	W := nextInts(n)
+	C := nextInts(n)
+	cw := make([][]int, 256)
+	for i := 0; i < n; i++ {
+		w := W[i]
+		c := C[i]
+		cw[c] = append(cw[c], w)
+	}
+	dp := make([][]bool, 257)
+	for i := 0; i < 257; i++ {
+		dp[i] = make([]bool, m+1)
+	}
+	dp[0][0] = true
+	for i := 0; i < 256; i++ {
+		for j := 0; j <= m; j++ {
+			if !dp[i][j] {
+				continue
+			}
+			dp[i+1][j] = true
+			for _, v := range cw[i] {
+				if j+v <= m {
+					dp[i+1][j+v] = true
+				}
+			}
+		}
+	}
+	out.YesNo(dp[256][m])
 }
 
 const bufsize = 4 * 1024 * 1024
