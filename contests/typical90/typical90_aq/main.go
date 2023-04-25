@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"container/heap"
+	"container/list"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,7 +12,65 @@ import (
 
 // 解答欄
 func solve() {
-
+	h, w := nextInt2()
+	rs, cs := nextInt2()
+	rt, ct := nextInt2()
+	rs--
+	cs--
+	rt--
+	ct--
+	s := nexts(h)
+	dist := make([][][]int, h)
+	for i := 0; i < h; i++ {
+		dist[i] = make([][]int, w)
+		for j := 0; j < w; j++ {
+			dist[i][j] = make([]int, 4)
+			for k := 0; k < 4; k++ {
+				dist[i][j][k] = MaxInt
+			}
+		}
+	}
+	dist[rs][cs][0] = 0
+	dist[rs][cs][1] = 0
+	dist[rs][cs][2] = 0
+	dist[rs][cs][3] = 0
+	type point struct {
+		r int
+		c int
+		d int
+	}
+	dx := []int{1, 0, -1, 0}
+	dy := []int{0, -1, 0, 1}
+	l := list.New()
+	l.PushBack(point{rs, cs, 0})
+	l.PushBack(point{rs, cs, 1})
+	l.PushBack(point{rs, cs, 2})
+	l.PushBack(point{rs, cs, 3})
+	for l.Len() > 0 {
+		e := l.Front()
+		now := e.Value.(point)
+		l.Remove(e)
+		for i := 0; i < 4; i++ {
+			nr, nc, nd := now.r+dy[i], now.c+dx[i], i
+			cost := dist[now.r][now.c][now.d]
+			if now.d != nd {
+				cost++
+			}
+			if nr >= 0 && nr < h && nc >= 0 && nc < w && s[nr][nc] != '#' && dist[nr][nc][nd] > cost {
+				dist[nr][nc][nd] = cost
+				if now.d == nd {
+					l.PushFront(point{nr, nc, nd})
+				} else {
+					l.PushBack(point{nr, nc, nd})
+				}
+			}
+		}
+	}
+	ans := MaxInt
+	for i := 0; i < 4; i++ {
+		ans = min(dist[rt][ct][i], ans)
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
