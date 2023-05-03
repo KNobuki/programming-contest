@@ -11,7 +11,28 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	a, b, c := make([]int, 46), make([]int, 46), make([]int, 46)
+	for i := 0; i < n; i++ {
+		a[nextInt()%46]++
+	}
+	for i := 0; i < n; i++ {
+		b[nextInt()%46]++
+	}
+	for i := 0; i < n; i++ {
+		c[nextInt()%46]++
+	}
+	ans := 0
+	for i := 0; i < 46; i++ {
+		for j := 0; j < 46; j++ {
+			for k := 0; k < 46; k++ {
+				if (i+j+k)%46 == 0 {
+					ans += a[i] * b[j] * c[k]
+				}
+			}
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

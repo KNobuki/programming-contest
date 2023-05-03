@@ -11,7 +11,24 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	a := make([][]int, 2)
+	a[0] = nextInts(n)
+	a[1] = nextInts(n)
+	sum := sumOfInts(a[0]) + sumOfInts(a[1])
+	dp := make([][]int, n+1)
+	for i := 0; i < n+1; i++ {
+		dp[i] = make([]int, 3)
+		for j := 0; j < 3; j++ {
+			dp[i][j] = 0
+		}
+	}
+	for i := 0; i < n; i++ {
+		dp[i+1][0] = max(dp[i][1], dp[i][2]) + a[0][i]
+		dp[i+1][1] = max(dp[i][0], dp[i][2]) + a[1][i]
+		dp[i+1][2] = max(dp[i][0], max(dp[i][1], dp[i][2]))
+	}
+	out.Println(sum - maxOfInts(dp[n]))
 }
 
 const bufsize = 4 * 1024 * 1024

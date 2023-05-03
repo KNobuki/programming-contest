@@ -5,13 +5,25 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	n, k := nextInt2()
+	points := make([]int, 0, 2*n)
+	for i := 0; i < n; i++ {
+		a, b := nextInt2()
+		points = append(points, a-b, b)
+	}
+	sort.Ints(points)
+	ans := 0
+	for i := 0; i < k; i++ {
+		ans += points[len(points)-(i+1)]
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
