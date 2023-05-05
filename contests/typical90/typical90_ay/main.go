@@ -5,13 +5,59 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	n, k, p := nextInt(), nextInt(), nextInt()
+	a, b := nextInts(n/2), nextInts(n-n/2)
+	acnt, bcnt := make([][]int, len(a)+1), make([][]int, len(b)+1)
+	for bit := 0; bit < 1<<len(a); bit++ {
+		sum := 0
+		cnt := 0
+		for i := 0; i < len(a); i++ {
+			if bit&(1<<i) == 0 {
+				continue
+			}
+			sum += a[i]
+			cnt++
+		}
+		acnt[cnt] = append(acnt[cnt], sum)
+	}
+	for _, v := range acnt {
+		sort.Ints(v)
+	}
+	for bit := 0; bit < 1<<len(b); bit++ {
+		sum := 0
+		cnt := 0
+		for i := 0; i < len(b); i++ {
+			if bit&(1<<i) == 0 {
+				continue
+			}
+			sum += b[i]
+			cnt++
+		}
+		bcnt[cnt] = append(bcnt[cnt], sum)
+	}
+	for _, v := range bcnt {
+		sort.Ints(v)
+	}
+	ans := 0
+	for anum := 0; anum <= k; anum++ {
+		bnum := k - anum
+		if anum >= len(acnt) || bnum >= len(bcnt) {
+			continue
+		}
+		for _, v := range acnt[anum] {
+			ans += sort.Search(len(bcnt[bnum]), func(i int) bool {
+				return v+bcnt[bnum][i] > p
+			})
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

@@ -11,7 +11,49 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, s := nextInt2()
+	dp := make([][]bool, n+1)
+	for i := 0; i < n+1; i++ {
+		dp[i] = make([]bool, s+1)
+	}
+	dp[0][0] = true
+	a, b := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		a[i], b[i] = nextInt2()
+		for j := 0; j <= s; j++ {
+			if !dp[i][j] {
+				continue
+			}
+			if j+a[i] <= s {
+				dp[i+1][j+a[i]] = true
+			}
+			if j+b[i] <= s {
+				dp[i+1][j+b[i]] = true
+			}
+		}
+	}
+	if !dp[n][s] {
+		out.Println("Impossible")
+		return
+	}
+	// true A false B
+	ans := make([]bool, n)
+	now := s
+	for i := n - 1; i >= 0; i-- {
+		if now-a[i] >= 0 && dp[i][now-a[i]] {
+			now -= a[i]
+			ans[i] = true
+		} else {
+			now -= b[i]
+		}
+	}
+	for _, an := range ans {
+		if an {
+			out.Printf("A")
+		} else {
+			out.Printf("B")
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024

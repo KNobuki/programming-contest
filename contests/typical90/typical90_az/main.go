@@ -11,7 +11,12 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	ans := 1
+	for i := 0; i < n; i++ {
+		ans = mmul(ans, sumOfInts(nextInts(6)))
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

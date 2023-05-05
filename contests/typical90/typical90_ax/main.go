@@ -11,7 +11,21 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, l := nextInt2()
+	dp := make([]int, n+1)
+	dp[0] = 1
+	for i := 0; i < n; i++ {
+		if dp[i] == 0 {
+			continue
+		}
+		if i+1 <= n {
+			dp[i+1] = madd(dp[i+1], dp[i])
+		}
+		if i+l <= n {
+			dp[i+l] = madd(dp[i+l], dp[i])
+		}
+	}
+	out.Println(dp[n])
 }
 
 const bufsize = 4 * 1024 * 1024
