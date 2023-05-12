@@ -11,7 +11,30 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, Q := nextInt2()
+	a := nextInts(n)
+	sub := make([]int, n-1)
+	sum := 0
+	for i := 0; i < n-1; i++ {
+		sub[i] = a[i+1] - a[i]
+		sum += abs(sub[i])
+	}
+	for i := 0; i < Q; i++ {
+		l, r, v := nextInt(), nextInt(), nextInt()
+		l--
+		r--
+		if l != 0 {
+			sum -= abs(sub[l-1])
+			sub[l-1] += v
+			sum += abs(sub[l-1])
+		}
+		if r != n-1 {
+			sum -= abs(sub[r])
+			sub[r] -= v
+			sum += abs(sub[r])
+		}
+		out.Println(sum)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024

@@ -5,13 +5,42 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	a := nextInts(n)
+	dp := make([]int, 0, n)
+	p := make([]int, n)
+	for i := 0; i < n; i++ {
+		index := sort.Search(len(dp), func(j int) bool {
+			return dp[j] >= a[i]
+		})
+		if index == len(dp) {
+			dp = append(dp, a[i])
+		} else {
+			dp[index] = a[i]
+		}
+		p[i] = index + 1
+	}
+	dp = make([]int, 0, n)
+	ans := 0
+	for i := n - 1; i >= 0; i-- {
+		index := sort.Search(len(dp), func(j int) bool {
+			return dp[j] >= a[i]
+		})
+		if index == len(dp) {
+			dp = append(dp, a[i])
+		} else {
+			dp[index] = a[i]
+		}
+		ans = max(ans, p[i]+index)
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
