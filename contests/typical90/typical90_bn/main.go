@@ -11,7 +11,26 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	l, r := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		l[i], r[i] = nextInt2()
+	}
+	var ans float64
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			cnt := 0
+			for inum := l[i]; inum <= r[i]; inum++ {
+				for jnum := l[j]; jnum <= r[j]; jnum++ {
+					if inum > jnum {
+						cnt++
+					}
+				}
+			}
+			ans += float64(cnt) / float64((r[i]-l[i]+1)*(r[j]-l[j]+1))
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
