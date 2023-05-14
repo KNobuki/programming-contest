@@ -11,7 +11,16 @@ import (
 
 // 解答欄
 func solve() {
-
+	s := next()
+	ans := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] == 'v' {
+			ans++
+		} else {
+			ans += 2
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
