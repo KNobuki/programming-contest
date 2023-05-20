@@ -11,7 +11,38 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	Q := nextInt()
+	t, x, y, v := make([]int, Q), make([]int, Q), make([]int, Q), make([]int, Q)
+	for i := 0; i < Q; i++ {
+		t[i], x[i], y[i], v[i] = nextInt(), nextInt()-1, nextInt()-1, nextInt()
+	}
+	b, c := make([]int, n-1), make([]int, n)
+	for q := 0; q < Q; q++ {
+		if t[q] == 0 {
+			b[x[q]] = v[q]
+		}
+	}
+	for i := 0; i < n-1; i++ {
+		c[i+1] = b[i] - c[i]
+	}
+	dsu := NewDsu(n)
+	for q := 0; q < Q; q++ {
+		switch t[q] {
+		case 0:
+			dsu.Merge(x[q], y[q])
+		case 1:
+			if !dsu.Same(x[q], y[q]) {
+				out.Println("Ambiguous")
+				continue
+			}
+			if (x[q]+y[q])%2 == 0 {
+				out.Println(v[q] + (c[y[q]] - c[x[q]]))
+			} else {
+				out.Println(c[x[q]] + c[y[q]] - v[q])
+			}
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
