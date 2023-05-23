@@ -5,13 +5,27 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	x, y := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		x[i], y[i] = nextInt2()
+	}
+	sort.Ints(x)
+	sort.Ints(y)
+	ax, ay := x[n/2], y[n/2]
+	ans := 0
+	for i := 0; i < n; i++ {
+		ans += abs(x[i] - ax)
+		ans += abs(y[i] - ay)
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
