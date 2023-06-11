@@ -11,7 +11,34 @@ import (
 
 // 解答欄
 func solve() {
-
+	h, w := nextInt2()
+	a, b := make([][]int, h), make([][]int, h)
+	for i := 0; i < h; i++ {
+		a[i] = nextInts(w)
+	}
+	for i := 0; i < h; i++ {
+		b[i] = nextInts(w)
+	}
+	ans := 0
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if i < h-1 && j < w-1 {
+				sub := b[i][j] - a[i][j]
+				ans += abs(sub)
+				for dy := 0; dy < 2; dy++ {
+					for dx := 0; dx < 2; dx++ {
+						a[i+dy][j+dx] += sub
+					}
+				}
+			}
+			if a[i][j] != b[i][j] {
+				out.YesNo(false)
+				return
+			}
+		}
+	}
+	out.YesNo(true)
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

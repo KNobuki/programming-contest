@@ -11,7 +11,67 @@ import (
 
 // 解答欄
 func solve() {
-
+	//h, w := nextInt2()
+	//s := nexts(h)
+	//k := 0
+	//dp := make([][][]int, 4)
+	//for a := 0; a < 4; a++ {
+	//	dp[a] = make([][]int, h)
+	//	for i := 0; i < h; i++ {
+	//		dp[a][i] = make([]int, w)
+	//		for j := 0; j < w; j++ {
+	//			if s[i][j] != '#' {
+	//				dp[a][i][j] = 1
+	//				k++
+	//			}
+	//		}
+	//	}
+	//}
+	//k /= 4
+	//dy := []int{-1, 0, 1, 0}
+	//dx := []int{0, -1, 0, 1}
+	//for a := 0; a < 4; a++ {
+	//	for i := 0; i < h; i++ {
+	//		for j := 0; j < w; j++ {
+	//			if s[i][j] == '#' {
+	//				continue
+	//			}
+	//			if i+1 < h && s[i+1][j] != '#' {
+	//				dp1[i+1][j] = dp1[i][j] + 1
+	//			}
+	//			if j+1 < w && s[i][j+1] != '#' {
+	//				dp1[i][j+1] = dp1[i][j+1] + 1
+	//			}
+	//		}
+	//	}
+	//}
+	//for i := h - 1; i >= 0; i-- {
+	//	for j := w - 1; j >= 0; j-- {
+	//		if s[i][j] == '#' {
+	//			continue
+	//		}
+	//		if i-1 >= 0 && s[i-1][j] != '#' {
+	//			dp2[i-1][j] = dp2[i][j] + 1
+	//		}
+	//		if j-1 >= 0 && s[i][j-1] != '#' {
+	//			dp2[i][j-1] = dp2[i][j] + 1
+	//		}
+	//	}
+	//}
+	//ans := 0
+	//for i := 0; i < h; i++ {
+	//	for j := 0; j < w; j++ {
+	//		if s[i][j] == '#' {
+	//			out.Printf("%d ", 0)
+	//			continue
+	//		}
+	//		x := dp1[i][j] + dp2[i][j] + 1
+	//		out.Printf("%d ", x)
+	//		ans = madd(ans, msub(mpow(2, k), mpow(2, k-x)))
+	//	}
+	//	out.Println()
+	//}
+	//out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
