@@ -11,7 +11,38 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, k := nextInt2()
+	a, b := make([]int, n), make([]int, n)
+	for i := 0; i < n; i++ {
+		a[i], b[i] = nextInt2()
+	}
+	amax := max(maxOfInts(a), k)
+	bmax := max(maxOfInts(b), k)
+	sum := make([][]int, amax+1)
+	for i := 0; i < amax+1; i++ {
+		sum[i] = make([]int, bmax+1)
+	}
+	for i := 0; i < n; i++ {
+		sum[a[i]][b[i]]++
+	}
+	for i := 0; i < amax+1; i++ {
+		for j := 0; j < bmax; j++ {
+			sum[i][j+1] += sum[i][j]
+		}
+	}
+	for i := 0; i < bmax+1; i++ {
+		for j := 0; j < amax; j++ {
+			sum[j+1][i] += sum[j][i]
+		}
+	}
+	ans := 0
+	for la := 1; la <= amax; la++ {
+		for lb := 1; lb <= bmax; lb++ {
+			ra, rb := min(la+k, amax), min(lb+k, bmax)
+			ans = max(ans, sum[ra][rb]-sum[ra][lb-1]-sum[la-1][rb]+sum[la-1][lb-1])
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
