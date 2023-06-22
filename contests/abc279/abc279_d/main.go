@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -11,7 +12,18 @@ import (
 
 // 解答欄
 func solve() {
-
+	a, b := nextInt(), nextInt()
+	left, right := 0, int(1e18)
+	for i := 0; i < 100; i++ {
+		mid := (left + right) / 2
+		midSec := -float64(a)/(float64(2)*float64(mid+1)*math.Sqrt(float64(mid+1))) + float64(b)
+		if midSec < 0 {
+			left = mid
+		} else {
+			right = mid
+		}
+	}
+	out.Println((float64(a) / math.Sqrt(float64(right+1))) + float64(right*b))
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -397,9 +409,6 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 		// 距離の最新値と異なる場合
 		if dist[position] != edge.Weight {
 			continue
-		}
-		if edge.idx != -1 {
-			out.Printf("%d ", edge.idx)
 		}
 
 		// 最短距離確定を更新する
