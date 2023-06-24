@@ -11,27 +11,66 @@ import (
 
 // 解答欄
 func solve() {
-	L, R := nextInt2()
-	b := 1
-	for b < L {
-		b *= 10
-	}
-	ans := 0
-	calcDigit := func(x int) int {
-		ret := 0
-		for x > 0 {
-			x /= 10
-			ret++
+	n, k, Q := nextInt(), nextInt(), nextInt()
+	ih := &IH{}
+	heap.Init(ih)
+	exist := make([]bool, n)
+	rih := &RIH{}
+	heap.Init(rih)
+	rexist := make([]bool, n)
+	a := make([]int, n)
+	sum := 0
+	hist := make(map[int]int)
+	rhist := make(map[int]int)
+	for q := 0; q < Q; q++ {
+		x, y := nextInt2()
+		x--
+		if exist[x] {
+			k++
+			sum -= a[x]
+			hist[a[x]]++
 		}
-		return ret
+		if rexist[x] {
+			rhist[a[x]]++
+		}
+		if ih.Len() < k {
+			heap.Push(ih, iht{
+				value: y,
+				index: x,
+			})
+			sum += y
+		} else {
+			v := heap.Pop(ih).(iht)
+			for hist[v.index] > 0 {
+				hist[v.index]--
+				v = heap.Pop(ih).(iht)
+			}
+			heap.Push(rih, iht{
+				value: y,
+				index: x,
+			})
+			rexist[x] = true
+			rv := heap.Pop(rih).(iht)
+			for rhist[rv.index] > 0 {
+				rhist[rv.index]--
+				rv = heap.Pop(rih).(iht)
+			}
+			if rv.value > v.value {
+				sum -= v.value
+				sum += rv.value
+				exist[v.index] = false
+				rexist[v.index] = true
+				exist[rv.index] = true
+				rexist[rv.index] = false
+				heap.Push(ih, rv)
+				heap.Push(rih, v)
+			} else {
+				heap.Push(ih, v)
+				heap.Push(rih, rv)
+			}
+		}
+		out.Println(sum)
 	}
-	for l := L; l <= R; {
-		r := min(b-1, R)
-		ans = madd(ans, mdiv(mmul(mmul(madd(l, r), madd(msub(r, l), 1)), calcDigit(l)), 2))
-		l = b
-		b *= 10
-	}
-	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -134,6 +173,15 @@ func nextInt() int {
 	return ret
 }
 
+func nextFloat() float64 {
+	in.Scan()
+	ret, e := strconv.ParseFloat(in.Text(), 64)
+	if e != nil {
+		panic(e)
+	}
+	return ret
+}
+
 func nextInt2() (int, int) {
 	return nextInt(), nextInt()
 }
@@ -180,6 +228,30 @@ func minOfInts(a []int) int {
 	res := MaxInt
 	for _, v := range a {
 		res = min(res, v)
+	}
+	return res
+}
+
+func uniqueInts(a []int) []int {
+	m := make(map[int]bool)
+	res := make([]int, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
+	}
+	return res
+}
+
+func uniqueStrings(a []string) []string {
+	m := make(map[string]bool)
+	res := make([]string, 0, len(m))
+	for _, v := range a {
+		if !m[v] {
+			m[v] = true
+			res = append(res, v)
+		}
 	}
 	return res
 }
@@ -240,15 +312,30 @@ func primeFact(x int) map[int]int {
 	return ret
 }
 
+func divisor(x int) []int {
+	ret := make([]int, 0, x)
+	for i := 1; i*i <= x; i++ {
+		if x%i == 0 {
+			ret = append(ret, i)
+			if x/i != i {
+				ret = append(ret, x/i)
+			}
+		}
+	}
+	return ret
+}
+
 type Dsu struct {
 	n            int
 	parentOrSize []int
+	edgeNum      []int
 }
 
 func NewDsu(n int) *Dsu {
 	d := &Dsu{
 		n:            n,
 		parentOrSize: make([]int, n),
+		edgeNum:      make([]int, n),
 	}
 	for i := range d.parentOrSize {
 		d.parentOrSize[i] = -1
@@ -265,6 +352,7 @@ func (d *Dsu) Merge(a, b int) int {
 	}
 	x, y := d.Leader(a), d.Leader(b)
 	if x == y {
+		d.edgeNum[x]++
 		return x
 	}
 	if -d.parentOrSize[x] < -d.parentOrSize[y] {
@@ -272,6 +360,7 @@ func (d *Dsu) Merge(a, b int) int {
 	}
 	d.parentOrSize[x] += d.parentOrSize[y]
 	d.parentOrSize[y] = x
+	d.edgeNum[x] += d.edgeNum[y] + 1
 	return x
 }
 
@@ -301,6 +390,13 @@ func (d *Dsu) Size(a int) int {
 		panic("")
 	}
 	return -d.parentOrSize[d.Leader(a)]
+}
+
+func (d *Dsu) EdgeNum(a int) int {
+	if !(0 <= a && a < d.n) {
+		panic("")
+	}
+	return d.edgeNum[d.Leader(a)]
 }
 
 func (d *Dsu) Groups() [][]int {
@@ -340,7 +436,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
-		{To: start, Weight: 0},
+		{To: start, Weight: 0, idx: -1},
 	}
 	heap.Init(h)
 	// ダイクストラ法
@@ -351,11 +447,14 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	for h.Len() > 0 {
 		// ヒープからキュー取得
 		edge := heap.Pop(h).(Edge)
-
 		// 次に確定させるべき頂点を求める
 		position := edge.To
 		// すでに最短距離が確定している場合
 		if confirm[position] {
+			continue
+		}
+		// 距離の最新値と異なる場合
+		if dist[position] != edge.Weight {
 			continue
 		}
 
@@ -370,7 +469,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 				// 最短距離リスト更新
 				dist[to] = weight
 				// 確定候補キューに格納
-				heap.Push(h, Edge{Weight: dist[to], To: to})
+				heap.Push(h, Edge{Weight: dist[to], To: to, idx: p.idx})
 			}
 		}
 	}
@@ -410,6 +509,10 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 		position := edge.To
 		// すでに最短距離が確定している場合
 		if confirm[position] {
+			continue
+		}
+		// 距離の最新値と異なる場合
+		if dist[position] != edge.Weight {
 			continue
 		}
 
@@ -494,6 +597,7 @@ func minv(a int) int {
 func mdiv(a, b int) int {
 	return ((a % mod) * minv(b)) % mod
 }
+
 func mpow(a, n int) int {
 	res := 1
 	for n > 0 {
@@ -549,6 +653,222 @@ func (h *IntHeap) Pop() interface{} {
 	x := old[n-1]
 	*h = old[0 : n-1]
 	return x
+}
+
+type iht struct {
+	value int
+	index int
+}
+
+type IH []iht
+
+func (h IH) Len() int           { return len(h) }
+func (h IH) Less(i, j int) bool { return h[i].value < h[j].value }
+func (h IH) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *IH) Push(x interface{}) {
+	// Push and Pop use pointer receivers because they modify the slice's length,
+	// not just its contents.
+	*h = append(*h, x.(iht))
+}
+
+func (h *IH) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+type RIH []iht
+
+func (h RIH) Len() int           { return len(h) }
+func (h RIH) Less(i, j int) bool { return h[i].value < h[j].value }
+func (h RIH) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *RIH) Push(x interface{}) {
+	// Push and Pop use pointer receivers because they modify the slice's length,
+	// not just its contents.
+	*h = append(*h, x.(iht))
+}
+
+func (h *RIH) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+type ReverseIntHeap []int
+
+func (h ReverseIntHeap) Len() int           { return len(h) }
+func (h ReverseIntHeap) Less(i, j int) bool { return h[i] > h[j] }
+func (h ReverseIntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *ReverseIntHeap) Push(x interface{}) {
+	// Push and Pop use pointer receivers because they modify the slice's length,
+	// not just its contents.
+	*h = append(*h, x.(int))
+}
+
+func (h *ReverseIntHeap) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+func NewIntArray(n, init int) []int {
+	ret := make([]int, n)
+	for i := 0; i < n; i++ {
+		ret[i] = init
+	}
+	return ret
+}
+
+func New2DIntArray(n, m, init int) [][]int {
+	ret := make([][]int, n)
+	for i := 0; i < n; i++ {
+		ret[i] = make([]int, m)
+		for j := 0; j < m; j++ {
+			ret[i][j] = init
+		}
+	}
+	return ret
+}
+
+// nextPermutation
+// example: for next := true; next; next = nextPermutation(a)
+func nextPermutation(aa []int) bool {
+	n := len(aa)
+	l := n - 2
+	for l >= 0 && aa[l] > aa[l+1] {
+		l--
+	}
+	if l < 0 {
+		return false
+	}
+	r := n - 1
+	for l < r && aa[l] > aa[r] {
+		r--
+	}
+	aa[l], aa[r] = aa[r], aa[l]
+	l++
+	r = n - 1
+	for l < r {
+		aa[l], aa[r] = aa[r], aa[l]
+		l++
+		r--
+	}
+	return true
+}
+
+type SegTreeLazy struct {
+	Size int
+	Ex   X  // identity element in monoid X
+	Em   M  // identity element in monoid M
+	Fx   FX // binary operation in monoid X
+	Fm   FM // binary operation in monoid M
+	Fa   FA // binary operation between X and M
+	Dat  []X
+	Lazy []M
+}
+
+type X struct {
+	val int
+}
+type M struct {
+	val int
+}
+type FX func(a, b X) X
+type FM func(a, b M) M
+type FA func(a X, b M) X
+
+func NewSegTreeLazy(n int, ex X, em M, fx FX, fm FM, fa FA) *SegTreeLazy {
+	sg := &SegTreeLazy{
+		Size: 1,
+		Fx:   fx,
+		Fm:   fm,
+		Fa:   fa,
+		Ex:   ex,
+		Em:   em,
+	}
+
+	for sg.Size < n {
+		sg.Size *= 2
+	}
+	sg.Dat = make([]X, 2*sg.Size)
+	for i := range sg.Dat {
+		sg.Dat[i] = sg.Ex
+	}
+	sg.Lazy = make([]M, 2*sg.Size)
+	for i := range sg.Lazy {
+		sg.Lazy[i] = sg.Em
+	}
+	return sg
+}
+
+// Set and Build used for bulk construction in O(n)
+func (sg *SegTreeLazy) Set(k int, x X) {
+	sg.Dat[k+sg.Size-1] = x
+}
+func (sg *SegTreeLazy) Build() {
+	for k := sg.Size - 2; k >= 0; k-- {
+		sg.Dat[k] = sg.Fx(sg.Dat[2*k+1], sg.Dat[2*k+2])
+	}
+}
+
+// Eval propagates the lazy data
+func (sg *SegTreeLazy) Eval(k int) {
+	if sg.Lazy[k] == sg.Em {
+		return
+	}
+
+	// propagate k-th lazy to its children
+	if k < sg.Size-1 {
+		sg.Lazy[2*k+1] = sg.Fm(sg.Lazy[2*k+1], sg.Lazy[k])
+		sg.Lazy[2*k+2] = sg.Fm(sg.Lazy[2*k+2], sg.Lazy[k])
+	}
+	// update itself
+	sg.Dat[k] = sg.Fa(sg.Dat[k], sg.Lazy[k])
+	sg.Lazy[k] = sg.Em
+}
+
+func (sg *SegTreeLazy) update(a, b int, x M, k, l, r int) {
+	sg.Eval(k)
+	if a <= l && r <= b {
+		sg.Lazy[k] = sg.Fm(sg.Lazy[k], x)
+		sg.Eval(k)
+	} else if a < r && l < b {
+		sg.update(a, b, x, 2*k+1, l, (l+r)/2)
+		sg.update(a, b, x, 2*k+2, (l+r)/2, r)
+		sg.Dat[k] = sg.Fx(sg.Dat[2*k+1], sg.Dat[2*k+2])
+	}
+}
+
+// Update updates [a, b) to x
+func (sg *SegTreeLazy) Update(a, b int, x M) {
+	sg.update(a, b, x, 0, 0, sg.Size)
+}
+
+func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
+	sg.Eval(k)
+	if r <= a || b <= l {
+		return sg.Ex
+	}
+	if a <= l && r <= b {
+		return sg.Dat[k]
+	}
+	vl := sg.query(a, b, 2*k+1, l, (l+r)/2)
+	vr := sg.query(a, b, 2*k+2, (l+r)/2, r)
+	return sg.Fx(vl, vr)
+}
+
+// Query returns the query result in [a, b)
+func (sg *SegTreeLazy) Query(a, b int) X {
+	return sg.query(a, b, 0, 0, sg.Size)
 }
 
 func init() {

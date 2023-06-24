@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/emirpasic/gods/trees/redblacktree"
 )
 
 // 解答欄
@@ -745,6 +747,24 @@ func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
 // Query returns the query result in [a, b)
 func (sg *SegTreeLazy) Query(a, b int) X {
 	return sg.query(a, b, 0, 0, sg.Size)
+}
+
+func update(tree *redblacktree.Tree, key interface{}, x int) {
+	old, found := tree.Get(key)
+	if found {
+		x += old.(int)
+	}
+	if x <= 0 {
+		tree.Remove(key)
+		return
+	}
+	tree.Put(key, x)
+}
+func increment(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, 1)
+}
+func decrement(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, -1)
 }
 
 func init() {
