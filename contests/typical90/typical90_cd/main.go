@@ -11,7 +11,22 @@ import (
 
 // 解答欄
 func solve() {
-
+	l, r := nextInt2()
+	ans := 0
+	a := 10
+	d := 1
+	for l >= a {
+		a *= 10
+		d++
+	}
+	for l <= r {
+		n := min(a-1, r)
+		ans = madd(ans, mdiv(mmul(n-l+1, mmul(madd(n, l), d)), 2))
+		l = a
+		a *= 10
+		d++
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
