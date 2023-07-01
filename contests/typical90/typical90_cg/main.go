@@ -5,13 +5,42 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	k := nextInt()
+	div := []int{}
+	for i := 1; i*i <= k; i++ {
+		if k%i == 0 {
+			div = append(div, i)
+			if i != k/i {
+				div = append(div, k/i)
+			}
+		}
+	}
+	sort.Ints(div)
+	ans := 0
+	for i := 0; i < len(div); i++ {
+		a := div[i]
+		if a*a*a > k {
+			break
+		}
+		for j := i; j < len(div); j++ {
+			b := div[j]
+			if b*b > k {
+				break
+			}
+			if k%(a*b) != 0 || (k/(a*b)) < b {
+				continue
+			}
+			ans++
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
