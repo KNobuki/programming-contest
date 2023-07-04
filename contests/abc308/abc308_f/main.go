@@ -5,7 +5,6 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -14,36 +13,36 @@ import (
 
 // 解答欄
 func solve() {
-	n, m := nextInt2()
-	p := nextInts(n)
-	l := nextInts(m)
-	d := nextInts(m)
-	type coupon struct {
-		l int
-		d int
-	}
-	coupons := make([]coupon, m)
-	for i := 0; i < m; i++ {
-		coupons[i] = coupon{
-			l: l[i],
-			d: d[i],
-		}
-	}
-	sort.Slice(coupons, func(i, j int) bool {
-		if coupons[i].d == coupons[j].d {
-			return coupons[i].l > coupons[j].l
-		}
-		return coupons[i].d > coupons[j].d
-	})
-	ans := sumOfInts(p)
-	sort.Sort(sort.Reverse(sort.IntSlice(p)))
-	c := 0
-	for i := 0; i < n; i++ {
-		if c >= len(coupons) {
-			continue
-		}
-		if 
-	}
+	//n, m := nextInt2()
+	//p := nextInts(n)
+	//l := nextInts(m)
+	//d := nextInts(m)
+	//type coupon struct {
+	//	l int
+	//	d int
+	//}
+	//coupons := make([]coupon, m)
+	//for i := 0; i < m; i++ {
+	//	coupons[i] = coupon{
+	//		l: l[i],
+	//		d: d[i],
+	//	}
+	//}
+	//sort.Slice(coupons, func(i, j int) bool {
+	//	if coupons[i].d == coupons[j].d {
+	//		return coupons[i].l > coupons[j].l
+	//	}
+	//	return coupons[i].d > coupons[j].d
+	//})
+	//ans := sumOfInts(p)
+	//sort.Sort(sort.Reverse(sort.IntSlice(p)))
+	//c := 0
+	//for i := 0; i < n; i++ {
+	//	if c >= len(coupons) {
+	//		continue
+	//	}
+	//	if
+	//}
 }
 
 const bufsize = 4 * 1024 * 1024

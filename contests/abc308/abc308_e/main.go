@@ -13,17 +13,17 @@ import (
 
 // 解答欄
 func solve() {
-	n := nextInt()
-	a := nextInts(n)
-	s := next()
-	cnt := make([][]int, 3)
-	for i := 0; i < 3; i++ {
-		cnt[i] = make([]int, 3)
-	}
-	l, r := 0, 0
-	for l < n && r < n {
-
-	}
+	//n := nextInt()
+	//a := nextInts(n)
+	//s := next()
+	//cnt := make([][]int, 3)
+	//for i := 0; i < 3; i++ {
+	//	cnt[i] = make([]int, 3)
+	//}
+	//l, r := 0, 0
+	//for l < n && r < n {
+	//
+	//}
 }
 
 const bufsize = 4 * 1024 * 1024
