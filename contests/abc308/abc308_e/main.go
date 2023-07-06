@@ -13,17 +13,53 @@ import (
 
 // 解答欄
 func solve() {
-	//n := nextInt()
-	//a := nextInts(n)
-	//s := next()
-	//cnt := make([][]int, 3)
-	//for i := 0; i < 3; i++ {
-	//	cnt[i] = make([]int, 3)
-	//}
-	//l, r := 0, 0
-	//for l < n && r < n {
-	//
-	//}
+	n := nextInt()
+	a := nextInts(n)
+	s := next()
+	mcum := make([][]int, n)
+	for i := 0; i < n; i++ {
+		mcum[i] = make([]int, 3)
+		if i > 0 {
+			copy(mcum[i], mcum[i-1])
+		}
+		if s[i] == 'M' {
+			mcum[i][a[i]]++
+		}
+	}
+	xcum := make([][]int, n)
+	for i := n - 1; i >= 0; i-- {
+		xcum[i] = make([]int, 3)
+		if i < n-1 {
+			copy(xcum[i], xcum[i+1])
+		}
+		if s[i] == 'X' {
+			xcum[i][a[i]]++
+		}
+	}
+	ans := 0
+	mex := func(m, e, x int) int {
+		set := make([]bool, 3)
+		set[m] = true
+		set[e] = true
+		set[x] = true
+		for i := 0; i < 3; i++ {
+			if !set[i] {
+				return i
+			}
+		}
+		return 3
+	}
+	for i := 1; i < n-1; i++ {
+		if s[i] != 'E' {
+			continue
+		}
+		for m := 0; m < 3; m++ {
+			for x := 0; x < 3; x++ {
+				ans += mcum[i-1][m] * xcum[i+1][x] * mex(m, a[i], x)
+			}
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

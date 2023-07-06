@@ -20,31 +20,71 @@ func solve() {
 		g[a] = append(g[a], b)
 		g[b] = append(g[b], a)
 	}
-	point := make([]int, n)
+	que := &pq{}
+	heap.Init(que)
+	confirm := make([]bool, n)
 	for i := 0; i < k; i++ {
 		p, h := nextInt2()
 		p--
-		point[p] = h
+		heap.Push(que, q{
+			p: p,
+			h: h,
+		})
 	}
-	type q struct {
-		i int
-		p int
-	}
-	vis := make([]bool, n)
-	for i := 0; i < n; i++ {
-		if vis[i] {
+	for que.Len() > 0 {
+		now := heap.Pop(que).(q)
+		if confirm[now.p] {
 			continue
 		}
-		que := []q{
-			{
-				i: i,
-				p: point[i],
-			},
+		confirm[now.p] = true
+		if now.h == 0 {
+			continue
 		}
-		for len(que) > 0 {
-
+		for _, v := range g[now.p] {
+			if confirm[v] {
+				continue
+			}
+			heap.Push(que, q{
+				p: v,
+				h: now.h - 1,
+			})
 		}
 	}
+	ans := []int{}
+	for i, v := range confirm {
+		if v {
+			ans = append(ans, i+1)
+		}
+	}
+	out.Println(len(ans))
+	for _, v := range ans {
+		out.Printf("%d ", v)
+	}
+}
+
+type q struct {
+	p int
+	h int
+}
+
+type pq []q
+
+func (h pq) Len() int           { return len(h) }
+func (h pq) Less(i, j int) bool { return h[i].h > h[j].h }
+func (h pq) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+// Push データ格納
+func (h *pq) Push(x interface{}) {
+	*h = append(*h, x.(q))
+}
+
+// Pop データ取り出し
+func (h *pq) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
 }
 
 const bufsize = 4 * 1024 * 1024
