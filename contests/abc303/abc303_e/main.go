@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -13,22 +14,69 @@ import (
 
 // 解答欄
 func solve() {
-	n, m := nextInt2()
-	dp := make([][]int, n)
+	n := nextInt()
+	deg := make([]int, n)
+	g := make([][]int, n)
+	for i := 0; i < n-1; i++ {
+		u, v := nextInt2()
+		u--
+		v--
+		g[u] = append(g[u], v)
+		g[v] = append(g[v], u)
+		deg[u]++
+		deg[v]++
+	}
+	que := []int{}
 	for i := 0; i < n; i++ {
-		dp[i] = make([]int, 2)
+		if deg[i] == 1 {
+			que = append(que, i)
+		}
 	}
-	dp[1][0] = mmul(m, (m - 1))
-	for i := 2; i < n; i++ {
-		dp[i][0] = madd(mmul(dp[i-1][0], m-2), mmul(dp[i-1][1], m-1))
-		dp[i][1] = dp[i-1][0]
+	vis := make([]bool, n)
+	ans := []int{}
+	type node struct {
+		index int
+		dist  int
 	}
-	out.Println(dp[n-1][0])
+	for len(que) > 0 {
+		now := que[0]
+		que = que[1:]
+		if vis[now] {
+			continue
+		}
+		que2 := []node{{index: now, dist: 0}}
+		k := 0
+		for len(que2) > 0 {
+			k++
+			now2 := que2[0]
+			que2 = que2[1:]
+			vis[now2.index] = true
+			for _, v := range g[now2.index] {
+				if vis[v] {
+					continue
+				}
+				if now2.dist == 2 {
+					deg[v]--
+					if deg[v] == 1 {
+						que = append(que, v)
+					}
+				} else {
+					vis[v] = true
+					que2 = append(que2, node{index: v, dist: now2.dist + 1})
+				}
+			}
+		}
+		ans = append(ans, k-1)
+	}
+	sort.Ints(ans)
+	for _, v := range ans {
+		out.Printf("%d ", v)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
 const MaxInt = int(^uint(0) >> 1)
-const mod = 998244353
+const mod = 1000000007
 
 var in = bufio.NewScanner(os.Stdin)
 var out Out
@@ -775,6 +823,96 @@ func increment(tree *redblacktree.Tree, key interface{}) {
 }
 func decrement(tree *redblacktree.Tree, key interface{}) {
 	update(tree, key, -1)
+}
+
+/*
+	type pqst struct {
+		x int
+		y int
+	}
+
+	pq := newpq([]compFunc{func(p, q interface{}) int {
+		if p.(pqst).x != q.(pqst).x {
+			// get from bigger
+			// if p.(pqst).x > q.(pqst).x {
+			if p.(pqst).x < q.(pqst).x {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		if p.(pqst).y != q.(pqst).y {
+			// get from bigger
+			// if p.(pqst).y > q.(pqst).y {
+			if p.(pqst).y < q.(pqst).y {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		return 0
+	}})
+	heap.Init(pq)
+	heap.Push(pq, pqst{x: 1, y: 1})
+	for !pq.IsEmpty() {
+		v := heap.Pop(pq).(pqst)
+	}
+*/
+
+type pq struct {
+	arr   []interface{}
+	comps []compFunc
+}
+
+type compFunc func(p, q interface{}) int
+
+func newpq(comps []compFunc) *pq {
+	return &pq{
+		comps: comps,
+	}
+}
+
+func (pq pq) Len() int {
+	return len(pq.arr)
+}
+
+func (pq pq) Swap(i, j int) {
+	pq.arr[i], pq.arr[j] = pq.arr[j], pq.arr[i]
+}
+
+func (pq pq) Less(i, j int) bool {
+	for _, comp := range pq.comps {
+		result := comp(pq.arr[i], pq.arr[j])
+		switch result {
+		case -1:
+			return true
+		case 1:
+			return false
+		case 0:
+			continue
+		}
+	}
+	return true
+}
+
+func (pq *pq) Push(x interface{}) {
+	pq.arr = append(pq.arr, x)
+}
+
+func (pq *pq) Pop() interface{} {
+	n := pq.Len()
+	item := pq.arr[n-1]
+	pq.arr = pq.arr[:n-1]
+	return item
+}
+
+func (pq *pq) IsEmpty() bool {
+	return pq.Len() == 0
+}
+
+// pq.GetRoot().(edge)
+func (pq *pq) GetRoot() interface{} {
+	return pq.arr[0]
 }
 
 func init() {

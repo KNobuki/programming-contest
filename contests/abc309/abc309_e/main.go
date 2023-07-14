@@ -14,21 +14,69 @@ import (
 // 解答欄
 func solve() {
 	n, m := nextInt2()
-	dp := make([][]int, n)
+	g := make([][]int, n)
+	for i := 0; i < n-1; i++ {
+		p := nextInt() - 1
+		g[p] = append(g[p], i+1)
+	}
+	c := make([]int, n)
+	confirm := make([]bool, n)
+	type pqst struct {
+		node int
+		cost int
+	}
+	pq := newpq([]compFunc{func(p, q interface{}) int {
+		if p.(pqst).cost > q.(pqst).cost {
+			return -1
+		} else {
+			return 1
+		}
+	}})
+	heap.Init(pq)
+	for i := 0; i < m; i++ {
+		x, y := nextInt2()
+		y++
+		x--
+		heap.Push(pq, pqst{
+			node: x,
+			cost: y,
+		})
+		c[x] = max(y, c[x])
+	}
+	for pq.Len() > 0 {
+		now := heap.Pop(pq).(pqst)
+		if now.cost != c[now.node] {
+			continue
+		}
+		if confirm[now.node] {
+			continue
+		}
+		confirm[now.node] = true
+
+		for _, v := range g[now.node] {
+			cost := now.cost - 1
+			if c[v] >= cost || cost == 0 || confirm[v] {
+				continue
+			}
+			heap.Push(pq, pqst{
+				node: v,
+				cost: cost,
+			})
+			c[v] = cost
+		}
+	}
+	ans := 0
 	for i := 0; i < n; i++ {
-		dp[i] = make([]int, 2)
+		if c[i] > 0 {
+			ans++
+		}
 	}
-	dp[1][0] = mmul(m, (m - 1))
-	for i := 2; i < n; i++ {
-		dp[i][0] = madd(mmul(dp[i-1][0], m-2), mmul(dp[i-1][1], m-1))
-		dp[i][1] = dp[i-1][0]
-	}
-	out.Println(dp[n-1][0])
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
 const MaxInt = int(^uint(0) >> 1)
-const mod = 998244353
+const mod = 1000000007
 
 var in = bufio.NewScanner(os.Stdin)
 var out Out
@@ -736,7 +784,7 @@ func (sg *SegTreeLazy) update(a, b int, x M, k, l, r int) {
 	}
 }
 
-// Update updates [a, b) to x
+// Update updates [a, b) to node
 func (sg *SegTreeLazy) Update(a, b int, x M) {
 	sg.update(a, b, x, 0, 0, sg.Size)
 }
@@ -775,6 +823,96 @@ func increment(tree *redblacktree.Tree, key interface{}) {
 }
 func decrement(tree *redblacktree.Tree, key interface{}) {
 	update(tree, key, -1)
+}
+
+/*
+	type pqst struct {
+		node int
+		cost int
+	}
+
+	pq := newpq([]compFunc{func(p, q interface{}) int {
+		if p.(pqst).node != q.(pqst).node {
+			// get from bigger
+			// if p.(pqst).node > q.(pqst).node {
+			if p.(pqst).node < q.(pqst).node {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		if p.(pqst).cost != q.(pqst).cost {
+			// get from bigger
+			// if p.(pqst).cost > q.(pqst).cost {
+			if p.(pqst).cost < q.(pqst).cost {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		return 0
+	}})
+	heap.Init(pq)
+	heap.Push(pq, pqst{node: 1, cost: 1})
+	for !pq.IsEmpty() {
+		v := heap.Pop(pq).(pqst)
+	}
+*/
+
+type pq struct {
+	arr   []interface{}
+	comps []compFunc
+}
+
+type compFunc func(p, q interface{}) int
+
+func newpq(comps []compFunc) *pq {
+	return &pq{
+		comps: comps,
+	}
+}
+
+func (pq pq) Len() int {
+	return len(pq.arr)
+}
+
+func (pq pq) Swap(i, j int) {
+	pq.arr[i], pq.arr[j] = pq.arr[j], pq.arr[i]
+}
+
+func (pq pq) Less(i, j int) bool {
+	for _, comp := range pq.comps {
+		result := comp(pq.arr[i], pq.arr[j])
+		switch result {
+		case -1:
+			return true
+		case 1:
+			return false
+		case 0:
+			continue
+		}
+	}
+	return true
+}
+
+func (pq *pq) Push(x interface{}) {
+	pq.arr = append(pq.arr, x)
+}
+
+func (pq *pq) Pop() interface{} {
+	n := pq.Len()
+	item := pq.arr[n-1]
+	pq.arr = pq.arr[:n-1]
+	return item
+}
+
+func (pq *pq) IsEmpty() bool {
+	return pq.Len() == 0
+}
+
+// pq.GetRoot().(edge)
+func (pq *pq) GetRoot() interface{} {
+	return pq.arr[0]
 }
 
 func init() {

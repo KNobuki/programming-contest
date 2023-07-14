@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -13,36 +14,45 @@ import (
 
 // 解答欄
 func solve() {
-	//n, m := nextInt2()
-	//p := nextInts(n)
-	//l := nextInts(m)
-	//d := nextInts(m)
-	//type coupon struct {
-	//	l int
-	//	d int
-	//}
-	//coupons := make([]coupon, m)
-	//for i := 0; i < m; i++ {
-	//	coupons[i] = coupon{
-	//		l: l[i],
-	//		d: d[i],
-	//	}
-	//}
-	//sort.Slice(coupons, func(i, j int) bool {
-	//	if coupons[i].d == coupons[j].d {
-	//		return coupons[i].l > coupons[j].l
-	//	}
-	//	return coupons[i].d > coupons[j].d
-	//})
-	//ans := sumOfInts(p)
-	//sort.Sort(sort.Reverse(sort.IntSlice(p)))
-	//c := 0
-	//for i := 0; i < n; i++ {
-	//	if c >= len(coupons) {
-	//		continue
-	//	}
-	//	if
-	//}
+	n, m := nextInt2()
+	p := nextInts(n)
+	sort.Ints(p)
+	type coupon struct {
+		l int
+		d int
+	}
+	coupons := make([]coupon, m)
+	availableCoupons := newpq([]compFunc{func(p, q interface{}) int {
+		if p.(coupon).d > q.(coupon).d {
+			return -1
+		} else {
+			return 1
+		}
+	}})
+	l := nextInts(m)
+	d := nextInts(m)
+	for i := 0; i < m; i++ {
+		coupons[i] = coupon{
+			l: l[i],
+			d: d[i],
+		}
+	}
+	sort.Slice(coupons, func(i, j int) bool {
+		return coupons[i].l < coupons[j].l
+	})
+	now := 0
+	ans := 0
+	for i := 0; i < n; i++ {
+		for now < m && coupons[now].l <= p[i] {
+			heap.Push(availableCoupons, coupons[now])
+			now++
+		}
+		if availableCoupons.Len() > 0 {
+			p[i] -= heap.Pop(availableCoupons).(coupon).d
+		}
+		ans += p[i]
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -805,4 +815,60 @@ func init() {
 func main() {
 	defer out.writer.Flush()
 	solve()
+}
+
+type pq struct {
+	arr   []interface{}
+	comps []compFunc
+}
+
+type compFunc func(p, q interface{}) int
+
+func newpq(comps []compFunc) *pq {
+	return &pq{
+		comps: comps,
+	}
+}
+
+func (pq pq) Len() int {
+	return len(pq.arr)
+}
+
+func (pq pq) Swap(i, j int) {
+	pq.arr[i], pq.arr[j] = pq.arr[j], pq.arr[i]
+}
+
+func (pq pq) Less(i, j int) bool {
+	for _, comp := range pq.comps {
+		result := comp(pq.arr[i], pq.arr[j])
+		switch result {
+		case -1:
+			return true
+		case 1:
+			return false
+		case 0:
+			continue
+		}
+	}
+	return true
+}
+
+func (pq *pq) Push(x interface{}) {
+	pq.arr = append(pq.arr, x)
+}
+
+func (pq *pq) Pop() interface{} {
+	n := pq.Len()
+	item := pq.arr[n-1]
+	pq.arr = pq.arr[:n-1]
+	return item
+}
+
+func (pq *pq) IsEmpty() bool {
+	return pq.Len() == 0
+}
+
+// pq.GetRoot().(edge)
+func (pq *pq) GetRoot() interface{} {
+	return pq.arr[0]
 }
