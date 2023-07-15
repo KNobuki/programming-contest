@@ -7,69 +7,54 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/emirpasic/gods/trees/redblacktree"
 )
 
 // 解答欄
 func solve() {
 	n, k, Q := nextInt(), nextInt(), nextInt()
-	ih := &IH{}
-	heap.Init(ih)
-	exist := make([]bool, n)
-	rih := &RIH{}
-	heap.Init(rih)
-	rexist := make([]bool, n)
+	x := redblacktree.NewWithIntComparator()
+	y := redblacktree.NewWithIntComparator()
+	ans := 0
+	cnt := k
 	a := make([]int, n)
-	sum := 0
-	hist := make(map[int]int)
-	rhist := make(map[int]int)
+	for i := 0; i < k; i++ {
+		increment(x, 0)
+	}
+	for i := 0; i < n-k; i++ {
+		increment(y, 0)
+	}
 	for q := 0; q < Q; q++ {
-		x, y := nextInt2()
-		x--
-		if exist[x] {
-			k++
-			sum -= a[x]
-			hist[a[x]]++
-		}
-		if rexist[x] {
-			rhist[a[x]]++
-		}
-		if ih.Len() < k {
-			heap.Push(ih, iht{
-				value: y,
-				index: x,
-			})
-			sum += y
+		xi, yi := nextInt2()
+		xi--
+		increment(y, yi)
+		if _, found := x.Get(a[xi]); found {
+			decrement(x, a[xi])
+			ans -= a[xi]
+			cnt--
 		} else {
-			v := heap.Pop(ih).(iht)
-			for hist[v.index] > 0 {
-				hist[v.index]--
-				v = heap.Pop(ih).(iht)
-			}
-			heap.Push(rih, iht{
-				value: y,
-				index: x,
-			})
-			rexist[x] = true
-			rv := heap.Pop(rih).(iht)
-			for rhist[rv.index] > 0 {
-				rhist[rv.index]--
-				rv = heap.Pop(rih).(iht)
-			}
-			if rv.value > v.value {
-				sum -= v.value
-				sum += rv.value
-				exist[v.index] = false
-				rexist[v.index] = true
-				exist[rv.index] = true
-				rexist[rv.index] = false
-				heap.Push(ih, rv)
-				heap.Push(rih, v)
-			} else {
-				heap.Push(ih, v)
-				heap.Push(rih, rv)
-			}
+			decrement(y, a[xi])
 		}
-		out.Println(sum)
+		a[xi] = yi
+		for cnt < k {
+			r := y.Right().Key.(int)
+			decrement(y, r)
+			increment(x, r)
+			cnt++
+			ans += r
+		}
+		for y.Size() > 0 && x.Left().Key.(int) < y.Right().Key.(int) {
+			l := x.Left().Key.(int)
+			r := y.Right().Key.(int)
+			decrement(x, l)
+			increment(y, l)
+			decrement(y, r)
+			increment(x, r)
+			ans -= l
+			ans += r
+		}
+		out.Println(ans)
 	}
 }
 
@@ -869,6 +854,24 @@ func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
 // Query returns the query result in [a, b)
 func (sg *SegTreeLazy) Query(a, b int) X {
 	return sg.query(a, b, 0, 0, sg.Size)
+}
+
+func update(tree *redblacktree.Tree, key interface{}, x int) {
+	old, found := tree.Get(key)
+	if found {
+		x += old.(int)
+	}
+	if x <= 0 {
+		tree.Remove(key)
+		return
+	}
+	tree.Put(key, x)
+}
+func increment(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, 1)
+}
+func decrement(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, -1)
 }
 
 func init() {
