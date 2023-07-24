@@ -11,7 +11,62 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := nextInt2()
+	g := make([][]int, n+m)
+	start, ter := make(map[int]bool), make(map[int]bool)
+	for i := 0; i < n; i++ {
+		var flag1, flagm bool
+		a := nextInt()
+		for j := 0; j < a; j++ {
+			s := nextInt()
+			s--
+			if s == 0 {
+				flag1 = true
+			}
+			if s == m-1 {
+				flagm = true
+			}
+			g[i] = append(g[i], n+s)
+			g[n+s] = append(g[n+s], i)
+		}
+		if flag1 {
+			start[i] = true
+		}
+		if flagm {
+			ter[i] = true
+		}
+	}
+	dist := make([]int, n+m)
+	for i := 0; i < n+m; i++ {
+		dist[i] = MaxInt
+	}
+	que := []int{}
+	for k, _ := range start {
+		que = append(que, k)
+		dist[k] = 0
+	}
+	for len(que) > 0 {
+		now := que[0]
+		que = que[1:]
+		for _, v := range g[now] {
+			if dist[v] != MaxInt {
+				continue
+			}
+			dist[v] = dist[now] + 1
+			que = append(que, v)
+		}
+	}
+	ans := MaxInt
+	for i := 0; i < n; i++ {
+		if ter[i] {
+			ans = min(ans, dist[i])
+		}
+	}
+	if ans == MaxInt {
+		out.Println(-1)
+	} else {
+		out.Println(ans / 2)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
