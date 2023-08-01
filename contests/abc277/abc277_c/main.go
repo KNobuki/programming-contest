@@ -11,7 +11,36 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	g := make(map[int][]int)
+	for i := 0; i < n; i++ {
+		a, b := nextInt2()
+		if _, ok := g[a]; !ok {
+			g[a] = []int{}
+		}
+		if _, ok := g[b]; !ok {
+			g[b] = []int{}
+		}
+		g[a] = append(g[a], b)
+		g[b] = append(g[b], a)
+	}
+	ans := 1
+	que := []int{1}
+	vis := make(map[int]bool)
+	vis[1] = true
+	for len(que) > 0 {
+		now := que[0]
+		que = que[1:]
+		for _, v := range g[now] {
+			if vis[v] {
+				continue
+			}
+			vis[v] = true
+			ans = max(ans, v)
+			que = append(que, v)
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
