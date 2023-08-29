@@ -35,11 +35,19 @@ func solve() {
 	sort.Slice(logs, func(i, j int) bool {
 		return logs[i].d < logs[j].d
 	})
+	index := 0
 	sum := 0
 	ans := make([]int, n+1)
-	for i := 0; i < 2*n-1; i++ {
-		sum += logs[i].in
-		ans[sum] += logs[i+1].d - logs[i].d
+	prev := 0
+	for index < 2*n {
+		ans[sum] += logs[index].d - prev
+		for index < 2*n-1 && logs[index].d == logs[index+1].d {
+			sum += logs[index].in
+			index++
+		}
+		sum += logs[index].in
+		prev = logs[index].d
+		index++
 	}
 	for i := 1; i <= n; i++ {
 		out.Printf("%d ", ans[i])
