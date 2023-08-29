@@ -5,16 +5,17 @@ import "sort"
 func groupAnagrams(strs []string) [][]string {
 	mp := make(map[string][]string)
 	for _, str := range strs {
-		sortedStr := []byte(str)
-		sort.Slice(sortedStr, func(i, j int) bool {
-			return sortedStr[i] < sortedStr[j]
+		bstr := []byte(str)
+		sort.Slice(bstr, func(i, j int) bool {
+			return bstr[i] < bstr[j]
 		})
-		if _, ok := mp[string(sortedStr)]; !ok {
-			mp[string(sortedStr)] = []string{}
+		sortedStr := string(bstr)
+		if _, ok := mp[sortedStr]; !ok {
+			mp[sortedStr] = []string{}
 		}
-		mp[string(sortedStr)] = append(mp[string(sortedStr)], str)
+		mp[sortedStr] = append(mp[sortedStr], str)
 	}
-	ret := [][]string{}
+	var ret [][]string
 	for _, strings := range mp {
 		ret = append(ret, strings)
 	}
