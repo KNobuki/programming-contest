@@ -11,7 +11,48 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := nextInt2()
+	squares := make(map[int]int)
+	for i := 0; i <= 1e3; i++ {
+		squares[i*i] = i
+	}
+	type vec struct {
+		x, y int
+	}
+	dxs := []int{1, 1, -1, -1}
+	dys := []int{1, -1, 1, -1}
+	var vecs []vec
+	for square, _ := range squares {
+		if _, ok := squares[m-square]; !ok {
+			continue
+		}
+		for _, dx := range dxs {
+			for _, dy := range dys {
+				vecs = append(vecs, vec{x: squares[square] * dx, y: squares[(m-square)] * dy})
+			}
+		}
+	}
+	ans := make([][]int, n)
+	for i := 0; i < n; i++ {
+		ans[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			ans[i][j] = -1
+		}
+	}
+	ans[0][0] = 0
+	que := []vec{{x: 0, y: 0}}
+	for len(que) > 0 {
+		now := que[0]
+		que = que[1:]
+		for _, v := range vecs {
+			nx, ny := now.x+v.x, now.y+v.y
+			if nx >= 0 && nx < n && ny >= 0 && ny < n && ans[ny][nx] == -1 {
+				ans[ny][nx] = ans[now.y][now.x] + 1
+				que = append(que, vec{x: nx, y: ny})
+			}
+		}
+	}
+	out.Print2DIntArray(ans, "%d ")
 }
 
 const bufsize = 4 * 1024 * 1024
