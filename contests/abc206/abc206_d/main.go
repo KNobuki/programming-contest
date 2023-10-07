@@ -7,31 +7,42 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/emirpasic/gods/trees/redblacktree"
 )
 
 // 解答欄
 func solve() {
-	k := nextInt()
-	remain := k
-	primes := make(map[int]int)
-	for i := 2; i*i <= k; i++ {
-		for remain%i == 0 {
-			primes[i]++
-			remain /= i
+	n := nextInt()
+	a := nextInts(n)
+	ma := maxOfInts(a) + 1
+	g := make([][]int, ma)
+	for i := 0; i < n/2; i++ {
+		if a[i] != a[n-i-1] {
+			g[a[i]] = append(g[a[i]], a[n-i-1])
+			g[a[n-i-1]] = append(g[a[n-i-1]], a[i])
 		}
 	}
-	if remain != 1 {
-		primes[remain]++
-	}
-	ans := 1
-	for p, _ := range primes {
-		for i := p; primes[p] > 0; i += p {
-			tmp := i
-			for tmp%p == 0 {
-				primes[p]--
-				tmp /= p
+	ans := 0
+	vis := make([]bool, ma)
+	for i := 0; i < ma; i++ {
+		if len(g[i]) == 0 || vis[i] {
+			continue
+		}
+		que := []int{i}
+		vis[i] = true
+		ans--
+		for len(que) > 0 {
+			ans++
+			now := que[0]
+			que = que[1:]
+			for _, v := range g[now] {
+				if vis[v] {
+					continue
+				}
+				vis[v] = true
+				que = append(que, v)
 			}
-			ans = max(ans, i)
 		}
 	}
 	out.Println(ans)
@@ -421,9 +432,6 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 		if dist[position] != edge.Weight {
 			continue
 		}
-		if edge.idx != -1 {
-			out.Printf("%d ", edge.idx)
-		}
 
 		// 最短距離確定を更新する
 		confirm[position] = true
@@ -771,6 +779,114 @@ func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
 // Query returns the query result in [a, b)
 func (sg *SegTreeLazy) Query(a, b int) X {
 	return sg.query(a, b, 0, 0, sg.Size)
+}
+
+func update(tree *redblacktree.Tree, key interface{}, x int) {
+	old, found := tree.Get(key)
+	if found {
+		x += old.(int)
+	}
+	if x <= 0 {
+		tree.Remove(key)
+		return
+	}
+	tree.Put(key, x)
+}
+func increment(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, 1)
+}
+func decrement(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, -1)
+}
+
+/*
+	type pqst struct {
+		x int
+		y int
+	}
+
+	pq := newpq([]compFunc{func(p, q interface{}) int {
+		if p.(pqst).x != q.(pqst).x {
+			// get from bigger
+			// if p.(pqst).x > q.(pqst).x {
+			if p.(pqst).x < q.(pqst).x {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		if p.(pqst).y != q.(pqst).y {
+			// get from bigger
+			// if p.(pqst).y > q.(pqst).y {
+			if p.(pqst).y < q.(pqst).y {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		return 0
+	}})
+	heap.Init(pq)
+	heap.Push(pq, pqst{x: 1, y: 1})
+	for !pq.IsEmpty() {
+		v := heap.Pop(pq).(pqst)
+	}
+*/
+
+type pq struct {
+	arr   []interface{}
+	comps []compFunc
+}
+
+type compFunc func(p, q interface{}) int
+
+func newpq(comps []compFunc) *pq {
+	return &pq{
+		comps: comps,
+	}
+}
+
+func (pq pq) Len() int {
+	return len(pq.arr)
+}
+
+func (pq pq) Swap(i, j int) {
+	pq.arr[i], pq.arr[j] = pq.arr[j], pq.arr[i]
+}
+
+func (pq pq) Less(i, j int) bool {
+	for _, comp := range pq.comps {
+		result := comp(pq.arr[i], pq.arr[j])
+		switch result {
+		case -1:
+			return true
+		case 1:
+			return false
+		case 0:
+			continue
+		}
+	}
+	return true
+}
+
+func (pq *pq) Push(x interface{}) {
+	pq.arr = append(pq.arr, x)
+}
+
+func (pq *pq) Pop() interface{} {
+	n := pq.Len()
+	item := pq.arr[n-1]
+	pq.arr = pq.arr[:n-1]
+	return item
+}
+
+func (pq *pq) IsEmpty() bool {
+	return pq.Len() == 0
+}
+
+// pq.GetRoot().(edge)
+func (pq *pq) GetRoot() interface{} {
+	return pq.arr[0]
 }
 
 func init() {
