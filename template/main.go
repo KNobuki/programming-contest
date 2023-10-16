@@ -878,6 +878,16 @@ func runLengthEncoding(s string) []runLength {
 	return res
 }
 
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
+}
+
 func init() {
 	in.Split(bufio.ScanWords)
 	in.Buffer(make([]byte, bufsize), bufsize)
