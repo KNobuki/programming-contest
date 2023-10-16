@@ -13,7 +13,48 @@ import (
 
 // 解答欄
 func solve() {
-
+	w, h, t := nextInt(), nextInt(), nextInt()
+	sx, sy := nextInt2()
+	tx, ty := nextInt2()
+	sqrt := make(map[int]int)
+	for i := 0; i <= 2e5; i++ {
+		sqrt[i*i] = i
+	}
+	ans := 0
+	for dx := -t; dx <= t; dx++ {
+		x := (((sx + dx) % (2 * w)) + (2 + w)) % (2 * w)
+		if x != tx && x != 2*w-tx {
+			continue
+		}
+		dy, ok := sqrt[t*t-dx*dx]
+		if !ok {
+			continue
+		}
+		if dy != 0 {
+			y1 := ((sy + dy) % (2 * h)) % (2 * h)
+			if y1 == ty {
+				ans++
+			}
+			if y1 == 2*h-ty {
+				ans++
+			}
+			y2 := (((sy - dy) % (2 * h)) + (2 * h)) % (2 * h)
+			if y2 == ty {
+				ans++
+			}
+			if y2 == 2*h-ty {
+				ans++
+			}
+		} else {
+			if sy%(2*h) == ty {
+				ans++
+			}
+			if sy%(2*h) == 2*h-ty {
+				ans++
+			}
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -855,27 +896,6 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
-}
-
-type runLength struct {
-	c byte
-	l int
-}
-
-func runLengthEncoding(s string) []runLength {
-	res := make([]runLength, 0, len(s))
-	for l := 0; l < len(s); {
-		r := l
-		for r < len(s)-1 && s[r] == s[r+1] {
-			r++
-		}
-		res = append(res, runLength{
-			c: s[l],
-			l: r - l + 1,
-		})
-		l = r + 1
-	}
-	return res
 }
 
 func init() {

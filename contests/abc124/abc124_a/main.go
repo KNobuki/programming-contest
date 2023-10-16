@@ -857,27 +857,6 @@ func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
 }
 
-type runLength struct {
-	c byte
-	l int
-}
-
-func runLengthEncoding(s string) []runLength {
-	res := make([]runLength, 0, len(s))
-	for l := 0; l < len(s); {
-		r := l
-		for r < len(s)-1 && s[r] == s[r+1] {
-			r++
-		}
-		res = append(res, runLength{
-			c: s[l],
-			l: r - l + 1,
-		})
-		l = r + 1
-	}
-	return res
-}
-
 func init() {
 	in.Split(bufio.ScanWords)
 	in.Buffer(make([]byte, bufsize), bufsize)

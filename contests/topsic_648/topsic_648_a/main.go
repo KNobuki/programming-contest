@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -13,7 +14,19 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	b := nextInts(n)
+	sort.Ints(b)
+	if len(b) == 2 {
+		out.Println((b[0] + b[1]) / 2)
+	}
+	d := min(b[1]-b[0], b[len(b)-1]-b[len(b)-2])
+	for i := 1; i < len(b); i++ {
+		if b[i]-b[i-1] != d {
+			out.Println(b[i-1] + d)
+			return
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -855,27 +868,6 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
-}
-
-type runLength struct {
-	c byte
-	l int
-}
-
-func runLengthEncoding(s string) []runLength {
-	res := make([]runLength, 0, len(s))
-	for l := 0; l < len(s); {
-		r := l
-		for r < len(s)-1 && s[r] == s[r+1] {
-			r++
-		}
-		res = append(res, runLength{
-			c: s[l],
-			l: r - l + 1,
-		})
-		l = r + 1
-	}
-	return res
 }
 
 func init() {

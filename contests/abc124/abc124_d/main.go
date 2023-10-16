@@ -13,7 +13,31 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, k := nextInt2()
+	s := next()
+	ans := 0
+	count := 0
+	r := 0
+	for l := 0; l < n; l++ {
+		for r < n && !(count == k && (r < n-1 && s[r] == '1' && s[r+1] == '0')) {
+			if s[r] == '0' && (r == 0 || s[r-1] == '1') {
+				count++
+			}
+			r++
+		}
+		if r == n {
+			ans = max(ans, r-l)
+		} else {
+			ans = max(ans, r-l+1)
+		}
+		if l == r {
+			r++
+		}
+		if l < n-1 && s[l] == '0' && s[l+1] == '1' {
+			count--
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -855,27 +879,6 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
-}
-
-type runLength struct {
-	c byte
-	l int
-}
-
-func runLengthEncoding(s string) []runLength {
-	res := make([]runLength, 0, len(s))
-	for l := 0; l < len(s); {
-		r := l
-		for r < len(s)-1 && s[r] == s[r+1] {
-			r++
-		}
-		res = append(res, runLength{
-			c: s[l],
-			l: r - l + 1,
-		})
-		l = r + 1
-	}
-	return res
 }
 
 func init() {
