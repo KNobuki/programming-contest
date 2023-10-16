@@ -79,3 +79,78 @@ func Test_runLengthEncoding(t *testing.T) {
 		})
 	}
 }
+
+func Test_runLengthDecoding(t *testing.T) {
+	type args struct {
+		rl []runLength
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "success",
+			args: args{
+				rl: []runLength{
+					{
+						c: 'a',
+						l: 3,
+					},
+					{
+						c: 'b',
+						l: 3,
+					},
+					{
+						c: 'c',
+						l: 3,
+					},
+				},
+			},
+			want: "aaabbbccc",
+		},
+		{
+			name: "一文字",
+			args: args{
+				rl: []runLength{
+					{
+						c: 'a',
+						l: 1,
+					},
+				},
+			},
+			want: "a",
+		},
+		{
+			name: "末尾が一文字違う",
+			args: args{
+				rl: []runLength{
+					{
+						c: 'a',
+						l: 3,
+					},
+					{
+						c: 'b',
+						l: 3,
+					},
+					{
+						c: 'c',
+						l: 3,
+					},
+					{
+						c: 'd',
+						l: 1,
+					},
+				},
+			},
+			want: "aaabbbcccd",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := runLengthDecoding(tt.args.rl); got != tt.want {
+				t.Errorf("runLengthDecoding() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
