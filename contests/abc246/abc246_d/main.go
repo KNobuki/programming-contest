@@ -13,7 +13,25 @@ import (
 
 // 解答欄
 func solve() {
-	//n := nextInt()
+	n := nextInt()
+	f := func(a, b int) int {
+		return a*a*a + a*a*b + a*b*b + b*b*b
+	}
+	ans := MaxInt
+	for a := 0; a <= 1e6; a++ {
+		l := a - 1
+		var r int = 1e6
+		for r-l > 1 {
+			b := (r + l) / 2
+			if f(a, b) >= n {
+				r = b
+			} else {
+				l = b
+			}
+		}
+		ans = min(ans, f(a, r))
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
