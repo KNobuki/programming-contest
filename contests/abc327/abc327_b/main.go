@@ -13,25 +13,14 @@ import (
 
 // 解答欄
 func solve() {
-	n := nextInt()
-	f := func(a, b int) int {
-		return a*a*a + a*a*b + a*b*b + b*b*b
-	}
-	ans := MaxInt
-	for a := 0; a <= 1e6; a++ {
-		l := a - 1
-		var r int = 1e6
-		for r-l > 1 {
-			b := (r + l) / 2
-			if f(a, b) >= n {
-				r = b
-			} else {
-				l = b
-			}
+	b := nextInt()
+	for i := 1; i <= 15; i++ {
+		if pow(i, i) == b {
+			out.Println(i)
+			return
 		}
-		ans = min(ans, f(a, r))
 	}
-	out.Println(ans)
+	out.Println(-1)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -873,6 +862,37 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
+}
+
+type runLength struct {
+	c byte
+	l int
+}
+
+func runLengthEncoding(s string) []runLength {
+	res := make([]runLength, 0, len(s))
+	for l := 0; l < len(s); {
+		r := l
+		for r < len(s)-1 && s[r] == s[r+1] {
+			r++
+		}
+		res = append(res, runLength{
+			c: s[l],
+			l: r - l + 1,
+		})
+		l = r + 1
+	}
+	return res
+}
+
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
 }
 
 func init() {

@@ -13,25 +13,39 @@ import (
 
 // 解答欄
 func solve() {
-	n := nextInt()
-	f := func(a, b int) int {
-		return a*a*a + a*a*b + a*b*b + b*b*b
+	a := make([][]int, 9)
+	for i := 0; i < 9; i++ {
+		a[i] = nextInts(9)
 	}
-	ans := MaxInt
-	for a := 0; a <= 1e6; a++ {
-		l := a - 1
-		var r int = 1e6
-		for r-l > 1 {
-			b := (r + l) / 2
-			if f(a, b) >= n {
-				r = b
-			} else {
-				l = b
+	for i := 0; i < 9; i++ {
+		existedX := make(map[int]bool, 9)
+		existedY := make(map[int]bool, 9)
+		for j := 0; j < 9; j++ {
+			if existedX[a[i][j]] || existedY[a[j][i]] {
+				out.YesNo(false)
+				return
+			}
+			existedX[a[i][j]] = true
+			existedY[a[j][i]] = true
+		}
+	}
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			sx := j * 3
+			sy := i * 3
+			existed := make(map[int]bool, 9)
+			for y := 0; y < 3; y++ {
+				for x := 0; x < 3; x++ {
+					if existed[a[sy+y][sx+x]] {
+						out.YesNo(false)
+						return
+					}
+					existed[a[sy+y][sx+x]] = true
+				}
 			}
 		}
-		ans = min(ans, f(a, r))
 	}
-	out.Println(ans)
+	out.YesNo(true)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -873,6 +887,37 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
+}
+
+type runLength struct {
+	c byte
+	l int
+}
+
+func runLengthEncoding(s string) []runLength {
+	res := make([]runLength, 0, len(s))
+	for l := 0; l < len(s); {
+		r := l
+		for r < len(s)-1 && s[r] == s[r+1] {
+			r++
+		}
+		res = append(res, runLength{
+			c: s[l],
+			l: r - l + 1,
+		})
+		l = r + 1
+	}
+	return res
+}
+
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
 }
 
 func init() {

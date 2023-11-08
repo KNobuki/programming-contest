@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -14,22 +15,36 @@ import (
 // 解答欄
 func solve() {
 	n := nextInt()
-	f := func(a, b int) int {
-		return a*a*a + a*a*b + a*b*b + b*b*b
-	}
-	ans := MaxInt
-	for a := 0; a <= 1e6; a++ {
-		l := a - 1
-		var r int = 1e6
-		for r-l > 1 {
-			b := (r + l) / 2
-			if f(a, b) >= n {
-				r = b
+	p := nextInts(n)
+	dp := make([][]float64, n)
+	dp[0] = []float64{float64(p[0])}
+	for i := 1; i < n; i++ {
+		dp[i] = make([]float64, i+1)
+		if dp[i-1][0] < float64(p[i]) {
+			dp[i][0] = float64(p[i])
+		} else {
+			dp[i][0] = dp[i-1][0]
+		}
+		for j := 1; j < i; j++ {
+			if dp[i-1][j] < dp[i-1][j-1]*0.9+float64(p[i]) {
+				dp[i][j] = dp[i-1][j-1]*0.9 + float64(p[i])
 			} else {
-				l = b
+				dp[i][j] = dp[i-1][j]
 			}
 		}
-		ans = min(ans, f(a, r))
+		dp[i][i] = dp[i-1][i-1]*0.9 + float64(p[i])
+
+	}
+	var ans, b, bb float64
+	ans = -1201
+	b = 0
+	bb = 1
+	for i := 0; i < n; i++ {
+		b += bb
+		if ans < dp[n-1][i]/b-1200/math.Sqrt(float64(i+1)) {
+			ans = dp[n-1][i]/b - 1200/math.Sqrt(float64(i+1))
+		}
+		bb *= 0.9
 	}
 	out.Println(ans)
 }
@@ -873,6 +888,37 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
+}
+
+type runLength struct {
+	c byte
+	l int
+}
+
+func runLengthEncoding(s string) []runLength {
+	res := make([]runLength, 0, len(s))
+	for l := 0; l < len(s); {
+		r := l
+		for r < len(s)-1 && s[r] == s[r+1] {
+			r++
+		}
+		res = append(res, runLength{
+			c: s[l],
+			l: r - l + 1,
+		})
+		l = r + 1
+	}
+	return res
+}
+
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
 }
 
 func init() {
