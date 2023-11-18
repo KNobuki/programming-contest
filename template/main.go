@@ -13,7 +13,7 @@ import (
 
 // 解答欄
 func solve() {
-
+	
 }
 
 const bufsize = 4 * 1024 * 1024
