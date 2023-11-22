@@ -11,12 +11,40 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m, k := nextInt(), nextInt(), nextInt()
+	g := make([][]int, n)
+	for i := 0; i < m; i++ {
+		u, v := nextInt2()
+		u--
+		v--
+		g[u] = append(g[u], v)
+		g[v] = append(g[v], u)
+	}
+	for i := 0; i < n; i++ {
+		g[i] = append(g[i], i)
+	}
+	dp := make([][]int, k+1)
+	dp[0] = make([]int, n)
+	dp[0][0] = 1
+	for i := 1; i < k+1; i++ {
+		sum := 0
+		for j := 0; j < n; j++ {
+			sum = madd(sum, dp[i-1][j])
+		}
+		dp[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			dp[i][j] = sum
+			for _, v := range g[j] {
+				dp[i][j] = msub(dp[i][j], dp[i-1][v])
+			}
+		}
+	}
+	out.Println(dp[k][0])
 }
 
 const bufsize = 4 * 1024 * 1024
 const MaxInt = int(^uint(0) >> 1)
-const mod = 1000000007
+const mod = 998244353
 
 var in = bufio.NewScanner(os.Stdin)
 var out Out
