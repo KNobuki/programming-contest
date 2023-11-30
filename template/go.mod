@@ -1,4 +1,4 @@
-module programming-contest
+module programming-contest/template
 
 go 1.20
 

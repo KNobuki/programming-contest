@@ -154,3 +154,29 @@ func Test_runLengthDecoding(t *testing.T) {
 		})
 	}
 }
+
+func Test_zAlgorithm(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{
+			name: "success",
+			args: args{
+				s: "ababaababaabababc",
+			},
+			want: []int{17, 0, 3, 0, 1, 10, 0, 3, 0, 1, 5, 0, 4, 0, 2, 0, 0},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := zAlgorithm(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("zAlgorithm() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

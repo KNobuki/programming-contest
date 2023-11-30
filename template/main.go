@@ -13,7 +13,7 @@ import (
 
 // 解答欄
 func solve() {
-	
+
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -886,6 +886,29 @@ func runLengthDecoding(rl []runLength) string {
 		}
 	}
 	return string(res)
+}
+
+func zAlgorithm(s string) []int {
+	if len(s) == 0 {
+		return []int{}
+	}
+	l, r := 0, 0
+	n := len(s)
+	z := make([]int, n)
+	z[0] = n
+	for i := 1; i < n; i++ {
+		if z[i-l] < r-i {
+			z[i] = z[i-l]
+		} else {
+			r = max(r, i)
+			for r < n && s[r] == s[r-i] {
+				r++
+			}
+			z[i] = r - i
+			l = i
+		}
+	}
+	return z
 }
 
 func init() {

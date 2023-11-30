@@ -11,7 +11,40 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, s := nextInt(), next()
+	//ok, ng := 0, n/2+1
+	//for ng-ok > 1 {
+	//	m := (ok + ng) / 2
+	//	f := false
+	//
+	//	for l1 := 0; l1 <= n-2*m; l1++ {
+	//		for l2 := l1 + m; l2 <= n-m; l2++ {
+	//			if s[l1:l1+m] == s[l2:l2+m] {
+	//				f = true
+	//				break
+	//			}
+	//		}
+	//		if f {
+	//			break
+	//		}
+	//	}
+	//	if f {
+	//		ok = m
+	//	} else {
+	//		ng = m
+	//	}
+	//}
+	//out.Println(ok)
+	ans := 0
+	for i := 0; i < n; i++ {
+		z := zAlgorithm(s[i:])
+		for j := 0; j < len(z); j++ {
+			if z[j] > ans && z[j] <= j {
+				ans = z[j]
+			}
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -745,6 +778,29 @@ func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
 // Query returns the query result in [a, b)
 func (sg *SegTreeLazy) Query(a, b int) X {
 	return sg.query(a, b, 0, 0, sg.Size)
+}
+
+func zAlgorithm(s string) []int {
+	if len(s) == 0 {
+		return []int{}
+	}
+	l, r := 0, 0
+	n := len(s)
+	z := make([]int, n)
+	z[0] = n
+	for i := 1; i < n; i++ {
+		if z[i-l] < r-i {
+			z[i] = z[i-l]
+		} else {
+			r = max(r, i)
+			for r < n && s[r] == s[r-i] {
+				r++
+			}
+			z[i] = r - i
+			l = i
+		}
+	}
+	return z
 }
 
 func init() {
