@@ -129,14 +129,6 @@ func nextInt2() (int, int) {
 	return nextInt(), nextInt()
 }
 
-func nextInt3() (int, int, int) {
-	return nextInt(), nextInt(), nextInt()
-}
-
-func nextInt4() (int, int, int, int) {
-	return nextInt(), nextInt(), nextInt(), nextInt()
-}
-
 func nextInts(n int) []int {
 	res := make([]int, n)
 	for i := range res {

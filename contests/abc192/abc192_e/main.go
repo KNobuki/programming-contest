@@ -13,7 +13,58 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m, x, y := nextInt4()
+	x--
+	y--
+	g := make([][]Edge, n)
+	k := make([]int, m)
+	for i := 0; i < m; i++ {
+		a, b, t, k2 := nextInt4()
+		a--
+		b--
+		g[a] = append(g[a], Edge{
+			To:     b,
+			Weight: t,
+			idx:    i,
+		})
+		g[b] = append(g[b], Edge{
+			To:     a,
+			Weight: t,
+			idx:    i,
+		})
+		k[i] = k2
+	}
+	dist := make([]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = MaxInt
+	}
+	dist[x] = 0
+	pq := &EdgeHeap{Edge{
+		To:     x,
+		Weight: 0,
+	}}
+	heap.Init(pq)
+	for pq.Len() > 0 {
+		now := heap.Pop(pq).(Edge)
+		if dist[now.To] != now.Weight {
+			continue
+		}
+		for _, edge := range g[now.To] {
+			weight := ((dist[now.To]+k[edge.idx]-1)/k[edge.idx])*k[edge.idx] + edge.Weight
+			if weight < dist[edge.To] {
+				heap.Push(pq, Edge{
+					To:     edge.To,
+					Weight: weight,
+				})
+				dist[edge.To] = weight
+			}
+		}
+	}
+	if dist[y] == MaxInt {
+		out.Println(-1)
+	} else {
+		out.Println(dist[y])
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
