@@ -13,11 +13,46 @@ import (
 
 // 解答欄
 func solve() {
-	//n, Q := nextInt2()
-	//p := nexts(n)
-	//for ; Q > 0; Q-- {
-	//	a, b, c, d := nextInt(), nextInt(), nextInt(), nextInt()
-	//}
+	n, Q := nextInt2()
+	p := nexts(n)
+	cum := make([][]int, n)
+	for i := 0; i < n; i++ {
+		cum[i] = make([]int, n)
+		if p[i][0] == 'B' {
+			cum[i][0] = 1
+		}
+		for j := 1; j < n; j++ {
+			cum[i][j] = cum[i][j-1]
+			if p[i][j] == 'B' {
+				cum[i][j]++
+			}
+		}
+	}
+	for i := 1; i < n; i++ {
+		for j := 0; j < n; j++ {
+			cum[i][j] += cum[i-1][j]
+		}
+	}
+	f := func(x, y int) int {
+		if x < 0 || y < 0 {
+			return 0
+		}
+		ret := ((x + 1) / n) * ((y + 1) / n) * cum[n-1][n-1]
+		if (y+1)%n != 0 {
+			ret += ((x + 1) / n) * cum[y%n][n-1]
+		}
+		if (x+1)%n != 0 {
+			ret += ((y + 1) / n) * cum[n-1][x%n]
+		}
+		if (y+1)%n != 0 && (x+1)%n != 0 {
+			ret += cum[y%n][x%n]
+		}
+		return ret
+	}
+	for ; Q > 0; Q-- {
+		a, b, c, d := nextInt(), nextInt(), nextInt(), nextInt()
+		out.Println(f(d, c) - f(d, a-1) - f(b-1, c) + f(b-1, a-1))
+	}
 }
 
 const bufsize = 4 * 1024 * 1024

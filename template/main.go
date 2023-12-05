@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -917,6 +918,11 @@ func zAlgorithm(s string) []int {
 		}
 	}
 	return z
+}
+
+func reverseSortIntSlice(a []int) []int {
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+	return a
 }
 
 func init() {

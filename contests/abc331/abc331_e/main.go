@@ -19,13 +19,6 @@ func solve() {
 		i, c int
 	}
 	a := nextInts(n)
-	sa := make([]ic, 0)
-	for i, v := range a {
-		sa = append(sa, ic{i: i, c: v})
-	}
-	sort.Slice(sa, func(i, j int) bool {
-		return sa[i].c > sa[j].c
-	})
 	b := nextInts(m)
 	sb := make([]ic, 0)
 	for i, v := range b {
@@ -41,42 +34,16 @@ func solve() {
 		d--
 		s[[2]int{c, d}] = true
 	}
-	type pqst struct {
-		c  int
-		i  int
-		j  int
-		i1 int
-		j1 int
-	}
-	pq := newpq([]compFunc{func(p, q interface{}) int {
-		if p.(pqst).c != q.(pqst).c {
-			// get from bigger
-			// if p.(pqst).c > q.(pqst).c {
-			if p.(pqst).c > q.(pqst).c {
-				return -1
-			} else {
-				return 1
+	ans := 0
+	for i, v := range a {
+		for _, vv := range sb {
+			if !s[[2]int{i, vv.i}] {
+				ans = max(ans, v+vv.c)
+				break
 			}
 		}
-		return 0
-	}})
-	heap.Init(pq)
-	heap.Push(pq, pqst{c: sa[0].c + sb[0].c, i: sa[0].i, j: sb[0].i, i1: 0, j1: 0})
-	for pq.Len() > 0 {
-		now := heap.Pop(pq).(pqst)
-		if !s[[2]int{now.i, now.j}] {
-			out.Println(now.c)
-			return
-		}
-		if now.i1 < n-1 {
-			tmp := pqst{c: sa[now.i1+1].c + sb[now.j1].c, i: sa[now.i1+1].i, j: now.j, i1: now.i1 + 1, j1: now.j1}
-			heap.Push(pq, tmp)
-		}
-		if now.j1 < n-1 {
-			tmp := pqst{c: sa[now.i1].c + sb[now.j1+1].c, i: now.i, j: sb[now.j1+1].i, i1: now.i1, j1: now.j1 + 1}
-			heap.Push(pq, tmp)
-		}
 	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
