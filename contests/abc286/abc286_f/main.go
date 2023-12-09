@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -13,13 +14,7 @@ import (
 
 // 解答欄
 func solve() {
-	_ = nextInt()
-	s, t := next(), next()
-	s = strings.ReplaceAll(s, "1", "l")
-	s = strings.ReplaceAll(s, "0", "o")
-	t = strings.ReplaceAll(t, "1", "l")
-	t = strings.ReplaceAll(t, "0", "o")
-	out.YesNo(s == t)
+
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -133,6 +128,14 @@ func nextFloat() float64 {
 
 func nextInt2() (int, int) {
 	return nextInt(), nextInt()
+}
+
+func nextInt3() (int, int, int) {
+	return nextInt(), nextInt(), nextInt()
+}
+
+func nextInt4() (int, int, int, int) {
+	return nextInt(), nextInt(), nextInt(), nextInt()
 }
 
 func nextInts(n int) []int {
@@ -861,6 +864,65 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
+}
+
+type runLength struct {
+	c byte
+	l int
+}
+
+func runLengthEncoding(s string) []runLength {
+	res := make([]runLength, 0, len(s))
+	for l := 0; l < len(s); {
+		r := l
+		for r < len(s)-1 && s[r] == s[r+1] {
+			r++
+		}
+		res = append(res, runLength{
+			c: s[l],
+			l: r - l + 1,
+		})
+		l = r + 1
+	}
+	return res
+}
+
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
+}
+
+func zAlgorithm(s string) []int {
+	if len(s) == 0 {
+		return []int{}
+	}
+	l, r := 0, 0
+	n := len(s)
+	z := make([]int, n)
+	z[0] = n
+	for i := 1; i < n; i++ {
+		if z[i-l] < r-i {
+			z[i] = z[i-l]
+		} else {
+			r = max(r, i)
+			for r < n && s[r] == s[r-i] {
+				r++
+			}
+			z[i] = r - i
+			l = i
+		}
+	}
+	return z
+}
+
+func reverseSortIntSlice(a []int) []int {
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+	return a
 }
 
 func init() {

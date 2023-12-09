@@ -5,6 +5,7 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -13,13 +14,53 @@ import (
 
 // 解答欄
 func solve() {
-	_ = nextInt()
-	s, t := next(), next()
-	s = strings.ReplaceAll(s, "1", "l")
-	s = strings.ReplaceAll(s, "0", "o")
-	t = strings.ReplaceAll(t, "1", "l")
-	t = strings.ReplaceAll(t, "0", "o")
-	out.YesNo(s == t)
+	n := nextInt()
+	a := nextInts(n)
+	s := nexts(n)
+	g := make([][]int, n)
+	for i := 0; i < n; i++ {
+		g[i] = make([]int, 0)
+		for j, v := range s[i] {
+			if v == 'Y' {
+				g[i] = append(g[i], j)
+			}
+		}
+	}
+	dist := make([][]int, n)
+	ans := make([][]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = make([]int, n)
+		ans[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			dist[i][j] = MaxInt
+			ans[i][j] = -1
+		}
+		h := &EdgeHeap{{To: i, Weight: 0, Value: a[i]}}
+		heap.Init(h)
+		for h.Len() > 0 {
+			now := heap.Pop(h).(Edge)
+			if now.Weight > dist[i][now.To] || (now.Weight == dist[i][now.To] && now.Value < ans[i][now.To]) {
+				continue
+			}
+			for _, v := range g[now.To] {
+				if now.Weight+1 <= dist[i][v] {
+					dist[i][v] = now.Weight + 1
+					ans[i][v] = max(ans[i][v], now.Value+a[v])
+					heap.Push(h, Edge{To: v, Weight: now.Weight + 1, Value: ans[i][v]})
+				}
+			}
+		}
+	}
+	for Q := nextInt(); Q > 0; Q-- {
+		u, v := nextInt2()
+		u--
+		v--
+		if ans[u][v] != -1 {
+			out.Printf("%d %d\n", dist[u][v], ans[u][v])
+		} else {
+			out.Println("Impossible")
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -133,6 +174,14 @@ func nextFloat() float64 {
 
 func nextInt2() (int, int) {
 	return nextInt(), nextInt()
+}
+
+func nextInt3() (int, int, int) {
+	return nextInt(), nextInt(), nextInt()
+}
+
+func nextInt4() (int, int, int, int) {
+	return nextInt(), nextInt(), nextInt(), nextInt()
 }
 
 func nextInts(n int) []int {
@@ -488,13 +537,19 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 type Edge struct {
 	To     int // 次に移動できるノード
 	Weight int // 移動にかかる重み(コスト)
+	Value  int
 	idx    int
 }
 type EdgeHeap []Edge
 
-func (h EdgeHeap) Len() int           { return len(h) }
-func (h EdgeHeap) Less(i, j int) bool { return h[i].Weight < h[j].Weight }
-func (h EdgeHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h EdgeHeap) Len() int { return len(h) }
+func (h EdgeHeap) Less(i, j int) bool {
+	if h[i].Weight == h[j].Weight {
+		return h[i].Value > h[j].Value
+	}
+	return h[i].Weight < h[j].Weight
+}
+func (h EdgeHeap) Swap(i, j int) { h[i], h[j] = h[j], h[i] }
 
 // Push データ格納
 func (h *EdgeHeap) Push(x interface{}) {
@@ -861,6 +916,65 @@ func (pq *pq) IsEmpty() bool {
 // pq.GetRoot().(edge)
 func (pq *pq) GetRoot() interface{} {
 	return pq.arr[0]
+}
+
+type runLength struct {
+	c byte
+	l int
+}
+
+func runLengthEncoding(s string) []runLength {
+	res := make([]runLength, 0, len(s))
+	for l := 0; l < len(s); {
+		r := l
+		for r < len(s)-1 && s[r] == s[r+1] {
+			r++
+		}
+		res = append(res, runLength{
+			c: s[l],
+			l: r - l + 1,
+		})
+		l = r + 1
+	}
+	return res
+}
+
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
+}
+
+func zAlgorithm(s string) []int {
+	if len(s) == 0 {
+		return []int{}
+	}
+	l, r := 0, 0
+	n := len(s)
+	z := make([]int, n)
+	z[0] = n
+	for i := 1; i < n; i++ {
+		if z[i-l] < r-i {
+			z[i] = z[i-l]
+		} else {
+			r = max(r, i)
+			for r < n && s[r] == s[r-i] {
+				r++
+			}
+			z[i] = r - i
+			l = i
+		}
+	}
+	return z
+}
+
+func reverseSortIntSlice(a []int) []int {
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+	return a
 }
 
 func init() {
