@@ -5,13 +5,52 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	s := nexts(n)
+	type lcp struct {
+		i, l int
+		s    string
+	}
+	lcps := make([]lcp, n)
+	for i := 0; i < n; i++ {
+		lcps[i] = lcp{i: i, s: s[i]}
+	}
+	sort.Slice(lcps, func(i, j int) bool {
+		return lcps[i].s < lcps[j].s
+	})
+	for i := 0; i < n; i++ {
+		l := 0
+		if i != n-1 {
+			for j := 0; j < len(lcps[i].s) && j < len(lcps[i+1].s); j++ {
+				if lcps[i].s[j] != lcps[i+1].s[j] {
+					break
+				}
+				l = max(l, j+1)
+			}
+		}
+		if i != 0 {
+			for j := 0; j < len(lcps[i].s) && j < len(lcps[i-1].s); j++ {
+				if lcps[i].s[j] != lcps[i-1].s[j] {
+					break
+				}
+				l = max(l, j+1)
+			}
+		}
+		lcps[i].l = l
+	}
+	sort.Slice(lcps, func(i, j int) bool {
+		return lcps[i].i < lcps[j].i
+	})
+	for _, v := range lcps {
+		out.Println(v.l)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
