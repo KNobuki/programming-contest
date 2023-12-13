@@ -11,7 +11,36 @@ import (
 
 // 解答欄
 func solve() {
+	n, m := nextInt2()
+	a := nextInts(n)
+	b := nextInts(m)
+	dp := make([][]int, n+1)
+	for i := 0; i <= n; i++ {
+		dp[i] = make([]int, m+1)
+		for j := 0; j <= m; j++ {
+			dp[i][j] = MaxInt
+		}
+	}
+	dp[0][0] = 0
+	for i := 0; i <= n; i++ {
+		for j := 0; j <= m; j++ {
+			if i >= 1 && j >= 1 {
+				if a[i-1] == b[j-1] {
+					dp[i][j] = min(dp[i][j], dp[i-1][j-1])
+				} else {
+					dp[i][j] = min(dp[i][j], dp[i-1][j-1]+1)
 
+				}
+			}
+			if i >= 1 {
+				dp[i][j] = min(dp[i][j], dp[i-1][j]+1)
+			}
+			if j >= 1 {
+				dp[i][j] = min(dp[i][j], dp[i][j-1]+1)
+			}
+		}
+	}
+	out.Println(dp[n][m])
 }
 
 const bufsize = 4 * 1024 * 1024
