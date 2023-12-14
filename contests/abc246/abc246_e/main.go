@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"container/heap"
+	"container/list"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,7 +14,64 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	ax, ay := nextInt2()
+	ax--
+	ay--
+	bx, by := nextInt2()
+	bx--
+	by--
+	s := nexts(n)
+	dist := make([][][]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = make([][]int, n)
+		for j := 0; j < n; j++ {
+			dist[i][j] = make([]int, 4)
+			for k := 0; k < 4; k++ {
+				dist[i][j][k] = MaxInt
+			}
+		}
+	}
+	for i := 0; i < 4; i++ {
+		dist[ax][ay][i] = 0
+	}
+	l := list.New()
+	dx := []int{-1, -1, 1, 1}
+	dy := []int{-1, 1, -1, 1}
+	for i := 0; i < 4; i++ {
+		x, y := ax+dx[i], ay+dy[i]
+		if x < 0 || x >= n || y < 0 || y >= n || s[x][y] == '#' {
+			continue
+		}
+		l.PushFront([3]int{ax + dx[i], ay + dy[i], i})
+		dist[x][y][i] = 1
+	}
+	for l.Len() > 0 {
+		now := l.Front().Value.([3]int)
+		l.Remove(l.Front())
+		cd := dist[now[0]][now[1]][now[2]]
+		if now[0] == bx && now[1] == by {
+			out.Println(cd)
+			return
+		}
+		for i := 0; i < 4; i++ {
+			x, y := now[0]+dx[i], now[1]+dy[i]
+			nd := cd
+			if now[2] != i {
+				nd++
+			}
+			if x < 0 || x >= n || y < 0 || y >= n || s[x][y] == '#' || dist[x][y][i] <= nd {
+				continue
+			}
+			dist[x][y][i] = nd
+			if now[2] == i {
+				l.PushFront([3]int{x, y, i})
+			} else {
+				l.PushBack([3]int{x, y, i})
+			}
+		}
+	}
+	out.Println(-1)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -379,7 +437,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
-		{To: start, Weight: 0, idx: -1},
+		{i: start, Weight: 0, idx: -1},
 	}
 	heap.Init(h)
 	// ダイクストラ法
@@ -391,7 +449,7 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 		// ヒープからキュー取得
 		edge := heap.Pop(h).(Edge)
 		// 次に確定させるべき頂点を求める
-		position := edge.To
+		position := edge.i
 		// すでに最短距離が確定している場合
 		if confirm[position] {
 			continue
@@ -406,13 +464,13 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 		// 隣接しているノードをループする
 		for _, p := range graph[position] {
 			// 次のノード, 1~positionまでの最短距離 + 現在のノードから次ぎのノードにいくコスト
-			to, weight := p.To, dist[position]+p.Weight
+			to, weight := p.i, dist[position]+p.Weight
 			// 現在のノードから行った場合に、他のノードから行った場合より距離が短い場合
 			if dist[to] > weight {
 				// 最短距離リスト更新
 				dist[to] = weight
 				// 確定候補キューに格納
-				heap.Push(h, Edge{Weight: dist[to], To: to, idx: p.idx})
+				heap.Push(h, Edge{Weight: dist[to], i: to, idx: p.idx})
 			}
 		}
 	}
@@ -436,7 +494,7 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
-		{To: start, Weight: 0},
+		{i: start, Weight: 0},
 	}
 	heap.Init(h)
 	// ダイクストラ法
@@ -449,7 +507,7 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 		edge := heap.Pop(h).(Edge)
 
 		// 次に確定させるべき頂点を求める
-		position := edge.To
+		position := edge.i
 		// すでに最短距離が確定している場合
 		if confirm[position] {
 			continue
@@ -464,13 +522,13 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 		// 隣接しているノードをループする
 		for _, p := range graph[position] {
 			// 次のノード, 1~positionまでの最短距離 + 現在のノードから次ぎのノードにいくコスト
-			to, weight := p.To, dist[position]+p.Weight
+			to, weight := p.i, dist[position]+p.Weight
 			// 現在のノードから行った場合に、他のノードから行った場合より距離が短い場合
 			if dist[to] > weight {
 				// 最短距離リスト更新
 				dist[to] = weight
 				// 確定候補キューに格納
-				heap.Push(h, Edge{Weight: dist[to], To: to})
+				heap.Push(h, Edge{Weight: dist[to], i: to})
 				// 経路リスト更新
 				from[to] = position
 			}
@@ -480,7 +538,8 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 }
 
 type Edge struct {
-	To     int // 次に移動できるノード
+	i      int // 次に移動できるノード
+	j      int
 	Weight int // 移動にかかる重み(コスト)
 	idx    int
 }
