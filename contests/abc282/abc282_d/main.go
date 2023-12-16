@@ -11,7 +11,69 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := nextInt2()
+	g := make([][]int, n)
+	for i := 0; i < m; i++ {
+		u, v := nextInt2()
+		u--
+		v--
+		g[u] = append(g[u], v)
+		g[v] = append(g[v], u)
+	}
+	// 0 未達 1 白 -1 黒
+	color := make([]int, n)
+	bi := make([]int, 0, n)
+	ans := 0
+	for i := 0; i < n; i++ {
+		if color[i] != 0 {
+			continue
+		}
+		que := []int{i}
+		var nodes []int
+		color[i] = 1
+		whites, blacks := 1, 0
+		f := true
+		for len(que) > 0 {
+			now := que[0]
+			que = que[1:]
+			nodes = append(nodes, now)
+			for _, v := range g[now] {
+				if color[now] == color[v] {
+					out.Println(0)
+					return
+				}
+				if color[v] != 0 {
+					continue
+				}
+				color[v] = -color[now]
+				if color[v] == 1 {
+					whites++
+				} else {
+					blacks++
+				}
+				que = append(que, v)
+			}
+		}
+		if !f {
+			continue
+		}
+		bi = append(bi, len(nodes))
+		sum := 0
+		for _, node := range nodes {
+			if color[node] == 1 {
+				sum += blacks - len(g[node])
+			} else {
+				sum += whites - len(g[node])
+			}
+		}
+		ans += sum / 2
+	}
+	sum := sumOfInts(bi)
+	for _, v := range bi {
+		sum -= v
+		ans += sum * v
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
