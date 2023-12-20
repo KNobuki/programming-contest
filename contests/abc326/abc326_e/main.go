@@ -5,18 +5,24 @@ import (
 	"container/heap"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/emirpasic/gods/trees/redblacktree"
 )
 
 // 解答欄
 func solve() {
-	n, p := nextInt2()
-	dp := make([]int, n+3)
+	n := nextInt()
+	a := nextInts(n)
+	dp := make([]int, n)
+	sum := 0
 	for i := n - 1; i >= 0; i-- {
-		dp[i] = madd(mmul(madd(dp[i+1], 1), msub(1, mdiv(p, 100))), mmul(madd(dp[i+2], 1), mdiv(p, 100)))
+		dp[i] = madd(a[i], mdiv(sum, n))
+		sum = madd(sum, dp[i])
 	}
-	out.Println(dp[0])
+	out.Println(mdiv(sumOfInts(dp), n))
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -130,6 +136,14 @@ func nextFloat() float64 {
 
 func nextInt2() (int, int) {
 	return nextInt(), nextInt()
+}
+
+func nextInt3() (int, int, int) {
+	return nextInt(), nextInt(), nextInt()
+}
+
+func nextInt4() (int, int, int, int) {
+	return nextInt(), nextInt(), nextInt(), nextInt()
 }
 
 func nextInts(n int) []int {
@@ -402,9 +416,6 @@ func dijkstra(N int, start int, graph [][]Edge) []int {
 		// 距離の最新値と異なる場合
 		if dist[position] != edge.Weight {
 			continue
-		}
-		if edge.idx != -1 {
-			out.Printf("%d ", edge.idx)
 		}
 
 		// 最短距離確定を更新する
@@ -753,6 +764,173 @@ func (sg *SegTreeLazy) query(a, b, k, l, r int) X {
 // Query returns the query result in [a, b)
 func (sg *SegTreeLazy) Query(a, b int) X {
 	return sg.query(a, b, 0, 0, sg.Size)
+}
+
+func update(tree *redblacktree.Tree, key interface{}, x int) {
+	old, found := tree.Get(key)
+	if found {
+		x += old.(int)
+	}
+	if x <= 0 {
+		tree.Remove(key)
+		return
+	}
+	tree.Put(key, x)
+}
+func increment(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, 1)
+}
+func decrement(tree *redblacktree.Tree, key interface{}) {
+	update(tree, key, -1)
+}
+
+/*
+	type pqst struct {
+		x int
+		y int
+	}
+
+	pq := newpq([]compFunc{func(p, q interface{}) int {
+		if p.(pqst).x != q.(pqst).x {
+			// get from bigger
+			// if p.(pqst).x > q.(pqst).x {
+			if p.(pqst).x < q.(pqst).x {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		if p.(pqst).y != q.(pqst).y {
+			// get from bigger
+			// if p.(pqst).y > q.(pqst).y {
+			if p.(pqst).y < q.(pqst).y {
+				return -1
+			} else {
+				return 1
+			}
+		}
+		return 0
+	}})
+	heap.Init(pq)
+	heap.Push(pq, pqst{x: 1, y: 1})
+	for !pq.IsEmpty() {
+		v := heap.Pop(pq).(pqst)
+	}
+*/
+
+type pq struct {
+	arr   []interface{}
+	comps []compFunc
+}
+
+type compFunc func(p, q interface{}) int
+
+func newpq(comps []compFunc) *pq {
+	return &pq{
+		comps: comps,
+	}
+}
+
+func (pq pq) Len() int {
+	return len(pq.arr)
+}
+
+func (pq pq) Swap(i, j int) {
+	pq.arr[i], pq.arr[j] = pq.arr[j], pq.arr[i]
+}
+
+func (pq pq) Less(i, j int) bool {
+	for _, comp := range pq.comps {
+		result := comp(pq.arr[i], pq.arr[j])
+		switch result {
+		case -1:
+			return true
+		case 1:
+			return false
+		case 0:
+			continue
+		}
+	}
+	return true
+}
+
+func (pq *pq) Push(x interface{}) {
+	pq.arr = append(pq.arr, x)
+}
+
+func (pq *pq) Pop() interface{} {
+	n := pq.Len()
+	item := pq.arr[n-1]
+	pq.arr = pq.arr[:n-1]
+	return item
+}
+
+func (pq *pq) IsEmpty() bool {
+	return pq.Len() == 0
+}
+
+// pq.GetRoot().(edge)
+func (pq *pq) GetRoot() interface{} {
+	return pq.arr[0]
+}
+
+type runLength struct {
+	c byte
+	l int
+}
+
+func runLengthEncoding(s string) []runLength {
+	res := make([]runLength, 0, len(s))
+	for l := 0; l < len(s); {
+		r := l
+		for r < len(s)-1 && s[r] == s[r+1] {
+			r++
+		}
+		res = append(res, runLength{
+			c: s[l],
+			l: r - l + 1,
+		})
+		l = r + 1
+	}
+	return res
+}
+
+func runLengthDecoding(rl []runLength) string {
+	res := make([]byte, 0)
+	for _, r := range rl {
+		for i := 0; i < r.l; i++ {
+			res = append(res, r.c)
+		}
+	}
+	return string(res)
+}
+
+func zAlgorithm(s string) []int {
+	if len(s) == 0 {
+		return []int{}
+	}
+	l, r := 0, 0
+	n := len(s)
+	z := make([]int, n)
+	z[0] = n
+	for i := 1; i < n; i++ {
+		if z[i-l] < r-i {
+			z[i] = z[i-l]
+		} else {
+			r = max(r, i)
+			for r < n && s[r] == s[r-i] {
+				r++
+			}
+			z[i] = r - i
+			l = i
+		}
+	}
+	return z
+}
+
+func reverseSortIntSlice(a []int) []int {
+	sort.Sort(sort.Reverse(sort.IntSlice(a)))
+	return a
 }
 
 func init() {
