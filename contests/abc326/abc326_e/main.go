@@ -14,12 +14,20 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	a := nextInts(n)
+	dp := make([]int, n)
+	sum := 0
+	for i := n - 1; i >= 0; i-- {
+		dp[i] = madd(a[i], mdiv(sum, n))
+		sum = madd(sum, dp[i])
+	}
+	out.Println(mdiv(sumOfInts(dp), n))
 }
 
 const bufsize = 4 * 1024 * 1024
 const MaxInt = int(^uint(0) >> 1)
-const mod = 1000000007
+const mod = 998244353
 
 var in = bufio.NewScanner(os.Stdin)
 var out Out
