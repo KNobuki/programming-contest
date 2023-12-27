@@ -14,7 +14,81 @@ import (
 
 // 解答欄
 func solve() {
-
+	p := make([][][][]bool, 3)
+	for i := 0; i < 3; i++ {
+		p[i] = make([][][]bool, 4)
+		for j := 0; j < 4; j++ {
+			p[i][j] = make([][]bool, 4)
+			for k := 0; k < 4; k++ {
+				p[i][j][k] = make([]bool, 4)
+			}
+		}
+	}
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 4; j++ {
+			P := next()
+			for k := 0; k < 4; k++ {
+				if P[k] == '#' {
+					p[i][0][j][k] = true
+				}
+			}
+		}
+	}
+	for i := 0; i < 3; i++ {
+		for j := 1; j < 4; j++ {
+			for k := 0; k < 4; k++ {
+				for l := 0; l < 4; l++ {
+					p[i][j][k][l] = p[i][j-1][l][3-k]
+				}
+			}
+		}
+	}
+	tmp := make([][]int, 4)
+	for i := 0; i < 4; i++ {
+		tmp[i] = make([]int, 4)
+	}
+	var dfs func(pi int)
+	ans := false
+	dfs = func(pi int) {
+		if pi == 3 {
+			f := true
+			for i := 0; i < 4; i++ {
+				for j := 0; j < 4; j++ {
+					if tmp[i][j] != 1 {
+						f = false
+					}
+				}
+			}
+			ans = ans || f
+			return
+		}
+		// i rotate
+		for i := 0; i < 4; i++ {
+			// j y add
+			for j := 0; j < 4; j++ {
+				// k x add
+				for k := 0; k < 4; k++ {
+					for y := 0; y < 4; y++ {
+						for x := 0; x < 4; x++ {
+							if p[pi][i][(y+j)%4][(x+k)%4] {
+								tmp[y][x]++
+							}
+						}
+					}
+					dfs(pi + 1)
+					for y := 0; y < 4; y++ {
+						for x := 0; x < 4; x++ {
+							if p[pi][i][(y+j)%4][(x+k)%4] {
+								tmp[y][x]--
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	dfs(0)
+	out.YesNo(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -95,20 +169,20 @@ func (out *Out) Print2DBoolArray(a [][]bool, format string) {
 	}
 }
 
-func ns() string {
+func next() string {
 	in.Scan()
 	return in.Text()
 }
 
-func nss(n int) []string {
+func nexts(n int) []string {
 	res := make([]string, n)
 	for i := range res {
-		res[i] = ns()
+		res[i] = next()
 	}
 	return res
 }
 
-func ni() int {
+func nextInt() int {
 	in.Scan()
 	ret, e := strconv.Atoi(in.Text())
 	if e != nil {
@@ -117,7 +191,7 @@ func ni() int {
 	return ret
 }
 
-func nf() float64 {
+func nextFloat() float64 {
 	in.Scan()
 	ret, e := strconv.ParseFloat(in.Text(), 64)
 	if e != nil {
@@ -126,22 +200,22 @@ func nf() float64 {
 	return ret
 }
 
-func ni2() (int, int) {
-	return ni(), ni()
+func nextInt2() (int, int) {
+	return nextInt(), nextInt()
 }
 
-func ni3() (int, int, int) {
-	return ni(), ni(), ni()
+func nextInt3() (int, int, int) {
+	return nextInt(), nextInt(), nextInt()
 }
 
-func ni4() (int, int, int, int) {
-	return ni(), ni(), ni(), ni()
+func nextInt4() (int, int, int, int) {
+	return nextInt(), nextInt(), nextInt(), nextInt()
 }
 
-func nis(n int) []int {
+func nextInts(n int) []int {
 	res := make([]int, n)
 	for i := range res {
-		res[i] = ni()
+		res[i] = nextInt()
 	}
 	return res
 }
@@ -627,7 +701,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns := true; ns; ns = nextPermutation(a)
+// example: for next := true; next; next = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2

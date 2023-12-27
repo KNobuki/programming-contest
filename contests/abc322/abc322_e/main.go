@@ -14,7 +14,53 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, k, p := ni3()
+	c := make([]int, n)
+	a := make([][]int, n)
+	for i := 0; i < n; i++ {
+		c[i] = ni()
+		a[i] = make([]int, k)
+		for j := 0; j < k; j++ {
+			a[i][j] = ni()
+		}
+	}
+	dp := make([]map[string]int, n+1)
+	dp[0] = make(map[string]int)
+	tmp := make([]byte, k)
+	dp[0][string(tmp)] = 0
+	for i := 0; i < n; i++ {
+		dp[i+1] = make(map[string]int)
+		for s, v := range dp[i] {
+			if _, ok := dp[i+1][s]; ok {
+				if dp[i][s] < dp[i+1][s] {
+					dp[i+1][s] = dp[i][s]
+				}
+			} else {
+				dp[i+1][s] = dp[i][s]
+			}
+			tmp = make([]byte, k)
+			copy(tmp, s)
+			for j := 0; j < k; j++ {
+				tmp[j] = byte(min(p, int(tmp[j])+a[i][j]))
+			}
+			if _, ok := dp[i+1][string(tmp)]; ok {
+				if v+c[i] < dp[i+1][string(tmp)] {
+					dp[i+1][string(tmp)] = v + c[i]
+				}
+			} else {
+				dp[i+1][string(tmp)] = v + c[i]
+			}
+		}
+	}
+	ap := make([]byte, k)
+	for i := 0; i < k; i++ {
+		ap[i] = byte(p)
+	}
+	if ans, ok := dp[n][string(ap)]; ok {
+		out.Println(ans)
+	} else {
+		out.Println(-1)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024

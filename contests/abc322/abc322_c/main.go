@@ -95,20 +95,20 @@ func (out *Out) Print2DBoolArray(a [][]bool, format string) {
 	}
 }
 
-func ns() string {
+func next() string {
 	in.Scan()
 	return in.Text()
 }
 
-func nss(n int) []string {
+func nexts(n int) []string {
 	res := make([]string, n)
 	for i := range res {
-		res[i] = ns()
+		res[i] = next()
 	}
 	return res
 }
 
-func ni() int {
+func nextInt() int {
 	in.Scan()
 	ret, e := strconv.Atoi(in.Text())
 	if e != nil {
@@ -117,7 +117,7 @@ func ni() int {
 	return ret
 }
 
-func nf() float64 {
+func nextFloat() float64 {
 	in.Scan()
 	ret, e := strconv.ParseFloat(in.Text(), 64)
 	if e != nil {
@@ -126,22 +126,22 @@ func nf() float64 {
 	return ret
 }
 
-func ni2() (int, int) {
-	return ni(), ni()
+func nextInt2() (int, int) {
+	return nextInt(), nextInt()
 }
 
-func ni3() (int, int, int) {
-	return ni(), ni(), ni()
+func nextInt3() (int, int, int) {
+	return nextInt(), nextInt(), nextInt()
 }
 
-func ni4() (int, int, int, int) {
-	return ni(), ni(), ni(), ni()
+func nextInt4() (int, int, int, int) {
+	return nextInt(), nextInt(), nextInt(), nextInt()
 }
 
-func nis(n int) []int {
+func nextInts(n int) []int {
 	res := make([]int, n)
 	for i := range res {
-		res[i] = ni()
+		res[i] = nextInt()
 	}
 	return res
 }
@@ -627,7 +627,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns := true; ns; ns = nextPermutation(a)
+// example: for next := true; next; next = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
