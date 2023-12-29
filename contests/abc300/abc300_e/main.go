@@ -12,31 +12,36 @@ import (
 // 解答欄
 func solve() {
 	n := nextInt()
-	dp := make(map[int]int)
-	dp[1] = 1
-	ih := &IntHeap{1}
-	heap.Init(ih)
-	sum := 0
+	m := make(map[int]int)
+	for n%2 == 0 {
+		n /= 2
+		m[2]++
+	}
+	for n%3 == 0 {
+		n /= 3
+		m[3]++
+	}
+	for n%5 == 0 {
+		n /= 5
+		m[5]++
+	}
+	if n != 1 {
+		out.Println(0)
+		return
+	}
 	ans := 0
-	for ih.Len() > 0 {
-		var now int
-		now = heap.Pop(ih).(int)
-		if now >= n {
-			if now == n {
-				ans = dp[now]
-			}
-			sum += dp[now]
-			continue
-		}
-		for i := 1; i <= 6; i++ {
-			_, ok := dp[now*i]
-			if !ok {
-				heap.Push(ih, now*i)
-			}
-			dp[now*i]++
+	combInit(1e5)
+	for s := 0; s <= min(m[2], m[3]); s++ {
+		for fo := 0; fo <= (m[2]-s)/2; fo++ {
+			fi := m[5]
+			th := m[3] - s
+			tw := m[2] - s - fo*2
+			all := s + fi + fo + th + tw
+			p := mpow(mdiv(1, 5), all)
+			ans = madd(ans, mmul(p, mmul(comb(all, s), mmul(comb(all-s, fi), mmul(comb(all-s-fi, fo), comb(all-s-fi-fo, th))))))
 		}
 	}
-	out.Println(mdiv(ans, sum))
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
