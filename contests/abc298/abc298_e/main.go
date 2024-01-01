@@ -11,6 +11,48 @@ import (
 
 // 解答欄
 func solve() {
+	n := nextInt()
+	a, b := nextInt2()
+	p, q := nextInt2()
+	dp1 := make([][]int, n-a+1)
+	dp1[0] = make([]int, n+1)
+	dp1[0][a] = 1
+	dp2 := make([][]int, n-b+1)
+	dp2[0] = make([]int, n+1)
+	dp2[0][b] = 1
+	for i := 1; i <= n-a; i++ {
+		dp1[i] = make([]int, n+1)
+		for j := 1; j <= n; j++ {
+			for k := 1; k <= p; k++ {
+				dp1[i][min(j+k, n)] = madd(dp1[i][min(j+k, n)], mmul(dp1[i-1][j], mdiv(1, p)))
+			}
+		}
+	}
+	for i := 1; i <= n-b; i++ {
+		dp2[i] = make([]int, n+1)
+		for j := 1; j <= n; j++ {
+			for k := 1; k <= q; k++ {
+				dp2[i][min(j+k, n)] = madd(dp2[i][min(j+k, n)], mmul(dp2[i-1][j], mdiv(1, q)))
+			}
+		}
+	}
+	p1 := make([]int, n-a+1)
+	for i := 1; i <= n-a; i++ {
+		p1[i] = msub(dp1[i][n], dp1[i-1][n])
+	}
+	p2 := make([]int, n-b+1)
+	for i := 1; i <= n-b; i++ {
+		p2[i] = msub(dp2[i][n], dp2[i-1][n])
+	}
+	ans := 0
+	for i1, v1 := range p1 {
+		for i2, v2 := range p2 {
+			if i1 <= i2 {
+				ans = madd(ans, mmul(v1, v2))
+			}
+		}
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

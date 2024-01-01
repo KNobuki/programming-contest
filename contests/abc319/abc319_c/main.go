@@ -14,7 +14,62 @@ import (
 
 // 解答欄
 func solve() {
-
+	c := make([][]int, 3)
+	for i := 0; i < 3; i++ {
+		c[i] = make([]int, 3)
+		for j := 0; j < 3; j++ {
+			c[i][j] = nextInt()
+		}
+	}
+	point := func(n int) (int, int) {
+		return n / 3, n % 3
+	}
+	a := make([]int, 9)
+	for i := 0; i < 9; i++ {
+		a[i] = i
+	}
+	sum := 0
+	for next := true; next; next = nextPermutation(a) {
+		row := make([]map[int]bool, 3)
+		col := make([]map[int]bool, 3)
+		for i := 0; i < 3; i++ {
+			row[i] = make(map[int]bool)
+			col[i] = make(map[int]bool)
+		}
+		dia := make([]map[int]bool, 2)
+		for i := 0; i < 2; i++ {
+			dia[i] = make(map[int]bool)
+		}
+		f := true
+		for _, i := range a {
+			y, x := point(i)
+			v := c[y][x]
+			if len(row[y]) == 1 && row[y][v] {
+				f = false
+			}
+			row[y][v] = true
+			if len(col[x]) == 1 && col[x][v] {
+				f = false
+			}
+			col[x][v] = true
+			if y == x {
+				if len(dia[0]) == 1 && dia[0][v] {
+					f = false
+				}
+				dia[0][v] = true
+			}
+			if (y == 0 && x == 2) || (y == 1 && x == 1) || (y == 2 && x == 0) {
+				if len(dia[1]) == 1 && dia[1][v] {
+					f = false
+				}
+				dia[1][v] = true
+			}
+		}
+		if f {
+			sum++
+		}
+	}
+	out.Println(float64(sum) / float64(362880))
 }
 
 const bufsize = 4 * 1024 * 1024

@@ -14,7 +14,28 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := nextInt2()
+	l := nextInts(n)
+	ng, ok := maxOfInts(l)-1, sumOfInts(l)+n-1
+	for ok-ng > 1 {
+		width := (ng + ok) / 2
+		rows := 1
+		words := l[0]
+		for i := 1; i < n; i++ {
+			if words+l[i]+1 > width {
+				rows++
+				words = l[i]
+			} else {
+				words += l[i] + 1
+			}
+		}
+		if rows > m {
+			ng = width
+		} else {
+			ok = width
+		}
+	}
+	out.Println(ok)
 }
 
 const bufsize = 4 * 1024 * 1024
