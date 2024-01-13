@@ -14,22 +14,21 @@ import (
 
 // 解答欄
 func solve() {
-	n, k := ni2()
-	a := nis(n)
-	ng, ok := 0, maxOfInts(a)
-	for ok-ng > 1 {
-		mid := (ng + ok) / 2
-		cnt := 0
-		for i := 0; i < n; i++ {
-			cnt += (a[i]-1+mid)/mid - 1
+	n := ni()
+	ans := MaxInt
+	for a := 1; a*a <= n; a++ {
+		if n%a != 0 {
+			continue
 		}
-		if cnt > k {
-			ng = mid
-		} else {
-			ok = mid
+		b := n / a
+		digit := 0
+		for b > 0 {
+			b /= 10
+			digit++
 		}
+		ans = min(ans, digit)
 	}
-	out.Println(ok)
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
