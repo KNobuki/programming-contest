@@ -14,12 +14,25 @@ import (
 
 // 解答欄
 func solve() {
-
+	k := ni()
+	sum := 0
+	b := 1
+	mod = k
+	for i := 0; i < k; i++ {
+		sum = madd(sum, mmul(b, 7))
+		if sum == 0 {
+			out.Println(i + 1)
+			return
+		}
+		b = mmul(b, 10)
+	}
+	out.Println(-1)
 }
+
+var mod int
 
 const bufsize = 4 * 1024 * 1024
 const MaxInt = int(^uint(0) >> 1)
-const mod = 998244353
 
 var in = bufio.NewScanner(os.Stdin)
 var out Out
