@@ -11,7 +11,41 @@ import (
 
 // 解答欄
 func solve() {
-
+	a, b := nextInt2()
+	k := nextInt()
+	ans := make([]byte, 0)
+	dp := make([][]int, a+1)
+	for i := 0; i <= a; i++ {
+		dp[i] = make([]int, b+1)
+	}
+	dp[0][0] = 1
+	for i := 0; i <= a; i++ {
+		for j := 0; j <= b; j++ {
+			if i+1 <= a {
+				dp[i+1][j] += dp[i][j]
+			}
+			if j+1 <= b {
+				dp[i][j+1] += dp[i][j]
+			}
+		}
+	}
+	for a > 0 && b > 0 {
+		if k <= dp[a-1][b] {
+			ans = append(ans, 'a')
+			a--
+		} else {
+			ans = append(ans, 'b')
+			k -= dp[a-1][b]
+			b--
+		}
+	}
+	for i := 0; i < a; i++ {
+		ans = append(ans, 'a')
+	}
+	for i := 0; i < b; i++ {
+		ans = append(ans, 'b')
+	}
+	out.Println(string(ans))
 }
 
 const bufsize = 4 * 1024 * 1024

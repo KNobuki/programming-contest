@@ -14,7 +14,8 @@ import (
 
 // 解答欄
 func solve() {
-
+	x, y := nextInt2()
+	out.YesNo(y-x <= 2 && x-y <= 3)
 }
 
 const bufsize = 4 * 1024 * 1024
