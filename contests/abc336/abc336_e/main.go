@@ -14,7 +14,42 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ns()
+	ans := 0
+	for i := 1; i <= 9*14; i++ {
+		dp := make([][][][]int, len(n)+1)
+		for j := 0; j <= len(n); j++ {
+			dp[j] = make([][][]int, 2)
+			for k := 0; k < 2; k++ {
+				dp[j][k] = make([][]int, i+1)
+				for l := 0; l <= i; l++ {
+					dp[j][k][l] = make([]int, i)
+				}
+			}
+		}
+		dp[0][0][0][0] = 1
+		for j := 0; j < len(n); j++ {
+			for k := 0; k <= i; k++ {
+				for l := 0; l < i; l++ {
+					for m := 0; m < 10; m++ {
+						if k+m > i {
+							break
+						}
+						num := int(n[j] - '0')
+						dp[j+1][1][k+m][(10*l+m)%i] += dp[j][1][k][l]
+						if m < num {
+							dp[j+1][1][k+m][(10*l+m)%i] += dp[j][0][k][l]
+						}
+						if m == num {
+							dp[j+1][0][k+m][(10*l+m)%i] += dp[j][0][k][l]
+						}
+					}
+				}
+			}
+		}
+		ans += dp[len(n)][0][i][0] + dp[len(n)][1][i][0]
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
