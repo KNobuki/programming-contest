@@ -14,7 +14,9 @@ import (
 
 // 解答欄
 func solve() {
-
+	s := next()
+	_ = next()
+	out.Printf("%s san", s)
 }
 
 const bufsize = 4 * 1024 * 1024
