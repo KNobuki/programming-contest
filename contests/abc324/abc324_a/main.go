@@ -14,7 +14,12 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	m := make(map[int]bool)
+	for i := 0; i < n; i++ {
+		m[nextInt()] = true
+	}
+	out.YesNo(len(m) == 1)
 }
 
 const bufsize = 4 * 1024 * 1024
