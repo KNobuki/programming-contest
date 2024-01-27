@@ -14,7 +14,14 @@ import (
 
 // 解答欄
 func solve() {
-
+	s := next()
+	for i := 1; i < len(s); i += 2 {
+		if s[i] == '1' {
+			out.YesNo(false)
+			return
+		}
+	}
+	out.YesNo(true)
 }
 
 const bufsize = 4 * 1024 * 1024
