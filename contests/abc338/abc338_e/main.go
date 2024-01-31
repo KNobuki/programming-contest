@@ -14,7 +14,35 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ni()
+	type pair struct {
+		a int
+		f bool
+	}
+	pairs := make([]pair, 2*n)
+	for i := 0; i < n; i++ {
+		a, b := ni2()
+		if a > b {
+			a, b = b, a
+		}
+		a--
+		b--
+		pairs[a] = pair{a: a, f: true}
+		pairs[b] = pair{a: a, f: false}
+	}
+	s := make([]int, 0, n)
+	for i := 0; i < 2*n; i++ {
+		if pairs[i].f {
+			s = append(s, pairs[i].a)
+		} else {
+			if pairs[i].a != s[len(s)-1] {
+				out.YesNo(true)
+				return
+			}
+			s = s[:len(s)-1]
+		}
+	}
+	out.YesNo(false)
 }
 
 const bufsize = 4 * 1024 * 1024

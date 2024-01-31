@@ -14,7 +14,18 @@ import (
 
 // 解答欄
 func solve() {
-
+	s := ns()
+	cnt := make([]int, 26)
+	for i := 0; i < len(s); i++ {
+		cnt[s[i]-'a']++
+	}
+	m := maxOfInts(cnt)
+	for i := 0; i < 26; i++ {
+		if cnt[i] == m {
+			out.Println(string('a' + byte(i)))
+			return
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024

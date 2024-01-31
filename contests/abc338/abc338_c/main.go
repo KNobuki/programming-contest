@@ -14,7 +14,27 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ni()
+	q, A, B := nis(n), nis(n), nis(n)
+	maxA := MaxInt
+	for i := 0; i < n; i++ {
+		if A[i] == 0 {
+			continue
+		}
+		maxA = min(maxA, q[i]/A[i])
+	}
+	ans := 0
+	for a := maxA; a >= 0; a-- {
+		b := MaxInt
+		for i := 0; i < n; i++ {
+			if B[i] == 0 {
+				continue
+			}
+			b = min(b, (q[i]-a*A[i])/B[i])
+		}
+		ans = max(ans, a+b)
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024

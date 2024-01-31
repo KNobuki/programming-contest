@@ -14,32 +14,39 @@ import (
 
 // 解答欄
 func solve() {
-	n, m := ni2()
-	x := nis(m)
-	imos := make([]int, n)
-	ans := 0
-	for i := 0; i < m-1; i++ {
-		xi, xip := x[i]-1, x[i+1]-1
-		if xi > xip {
-			xi, xip = xip, xi
+	n := ni()
+	type point struct {
+		x, y, z int
+	}
+	points := make([]point, n)
+	for i := 0; i < n; i++ {
+		points[i].x, points[i].y, points[i].z = ni3()
+	}
+	dist := make([][]int, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			dist[i] = append(dist[i], abs(points[j].x-points[i].x)+abs(points[j].y-points[i].y)+max(0, points[j].z-points[i].z))
 		}
-		if xip-xi < xi+n-xip {
-			imos[xi] += (xi + n - xip) - (xip - xi)
-			imos[xip] -= (xi + n - xip) - (xip - xi)
-			ans += xip - xi
-		} else {
-			if xi > 0 {
-				imos[0] += (xip - xi) - (xi + n - xip)
-				imos[xi] -= (xip - xi) - (xi + n - xip)
+	}
+	dp := make([][]int, 1<<n)
+	for i := 0; i < 1<<n; i++ {
+		dp[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			dp[i][j] = MaxInt
+		}
+	}
+	dp[0][0] = 0
+	for i := 0; i < 1<<n; i++ {
+		for j := 0; j < n; j++ {
+			if dp[i][j] == MaxInt {
+				continue
 			}
-			imos[xip] += (xip - xi) - (xi + n - xip)
-			ans += xi + n - xip
+			for k := 0; k < n; k++ {
+				dp[i|(1<<k)][k] = min(dp[i|(1<<k)][k], dp[i][j]+dist[j][k])
+			}
 		}
 	}
-	for i := 1; i < n; i++ {
-		imos[i] += imos[i-1]
-	}
-	out.Println(ans + minOfInts(imos))
+	out.Println(dp[(1<<n)-1][0])
 }
 
 const bufsize = 4 * 1024 * 1024

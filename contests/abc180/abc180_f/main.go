@@ -14,32 +14,7 @@ import (
 
 // 解答欄
 func solve() {
-	n, m := ni2()
-	x := nis(m)
-	imos := make([]int, n)
-	ans := 0
-	for i := 0; i < m-1; i++ {
-		xi, xip := x[i]-1, x[i+1]-1
-		if xi > xip {
-			xi, xip = xip, xi
-		}
-		if xip-xi < xi+n-xip {
-			imos[xi] += (xi + n - xip) - (xip - xi)
-			imos[xip] -= (xi + n - xip) - (xip - xi)
-			ans += xip - xi
-		} else {
-			if xi > 0 {
-				imos[0] += (xip - xi) - (xi + n - xip)
-				imos[xi] -= (xip - xi) - (xi + n - xip)
-			}
-			imos[xip] += (xip - xi) - (xi + n - xip)
-			ans += xi + n - xip
-		}
-	}
-	for i := 1; i < n; i++ {
-		imos[i] += imos[i-1]
-	}
-	out.Println(ans + minOfInts(imos))
+
 }
 
 const bufsize = 4 * 1024 * 1024
