@@ -14,7 +14,45 @@ import (
 
 // 解答欄
 func solve() {
-
+	h, w := nextInt2()
+	s := nexts(h)
+	cnt := 0
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			if s[i][j] == '#' {
+				cnt++
+			}
+		}
+	}
+	dsu := NewDsu(h * w)
+	id := func(y, x int) int {
+		return y*w + x
+	}
+	// 0 1 2 3
+	// 4 5 6 7
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			if s[y][x] == '.' {
+				continue
+			}
+			for dy := -1; dy <= 1; dy++ {
+				for dx := -1; dx <= 1; dx++ {
+					if dy == 0 && dx == 0 {
+						continue
+					}
+					ny, nx := y+dy, x+dx
+					if ny < 0 || ny >= h || nx < 0 || nx >= w || s[ny][nx] == '.' {
+						continue
+					}
+					if !dsu.Same(id(y, x), id(ny, nx)) {
+						dsu.Merge(id(y, x), id(ny, nx))
+						cnt--
+					}
+				}
+			}
+		}
+	}
+	out.Println(cnt)
 }
 
 const bufsize = 4 * 1024 * 1024
