@@ -14,7 +14,27 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := nextInt()
+	type pair struct {
+		w, x int
+	}
+	pairs := make([]pair, n)
+	for i := 0; i < n; i++ {
+		pairs[i].w, pairs[i].x = nextInt2()
+	}
+	ans := 0
+	for i := 0; i < 24; i++ {
+		sum := 0
+		for j := 0; j < n; j++ {
+			t := (i + pairs[j].x) % 24
+			if t < 9 || t+1 > 18 {
+				continue
+			}
+			sum += pairs[j].w
+		}
+		ans = max(ans, sum)
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
