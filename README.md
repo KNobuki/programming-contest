@@ -25,7 +25,7 @@ ContestGenは、競技プログラミング用のコンテストディレクト�
 以下のようにコマンドラインから実行できます。
 
 ``` shell
-$ ./contestgen -contest example_contest -problems 30
+./contestgen -contest example_contest -problems 30
 ```
 -contest オプションにコンテスト名を、-problems オプションに問題数を指定してください。contestsディレクトリ配下に指定されたコンテスト名のディレクトリが作成され、問題名ごとにサブディレクトリが作成され、テンプレートファイルがコピーされます。
 
