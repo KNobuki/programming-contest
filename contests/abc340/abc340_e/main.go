@@ -14,7 +14,38 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := ni2()
+	ex := X{0}
+	fx := func(a, b X) X {
+		return X{max(a.val, b.val)}
+	}
+	em := M{0}
+	fm := func(a, b M) M {
+		return M{a.val + b.val}
+	}
+	fa := func(a X, b M) X {
+		return X{a.val + b.val}
+	}
+	seg := NewSegTreeLazy(n, ex, em, fx, fm, fa)
+	for i := 0; i < n; i++ {
+		seg.Set(i, X{ni()})
+	}
+	seg.Build()
+	for i := 0; i < m; i++ {
+		b := ni()
+		x := seg.Query(b, b+1).val
+		seg.Update(b, b+1, M{val: -x})
+		seg.Update(0, n, M{val: x / n})
+		end := (b + x%n) % n
+		if end < b {
+			seg.Update(b+1, n, M{val: 1})
+			b = -1
+		}
+		seg.Update(b+1, end+1, M{val: 1})
+	}
+	for i := 0; i < n; i++ {
+		out.Printf("%d ", seg.Query(i, i+1).val)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -377,69 +408,121 @@ func (d *Dsu) Groups() [][]int {
 }
 
 func dijkstra(N int, start int, graph [][]Edge) []int {
+	/* ダイクストラ法 */
+	// 最短距離が確定したかどうかのリスト
+	confirm := make([]bool, N+1)
+	// 最短距離リスト
 	dist := make([]int, N+1)
 	for i := 0; i <= N; i++ {
 		dist[i] = MaxInt
 	}
+	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
-		{To: start, Weight: 0},
+		{To: start, Weight: 0, idx: -1},
 	}
 	heap.Init(h)
+	// ダイクストラ法
+	// 確定候補から一番最短距離が近いとこを確定させていくのに
+	// 毎回ループで探すのは大変なため
+	// ヒープキューで最小ノードを取り出していく
+	// (確定候補がなくなったら終了)
 	for h.Len() > 0 {
+		// ヒープからキュー取得
 		edge := heap.Pop(h).(Edge)
+		// 次に確定させるべき頂点を求める
 		position := edge.To
+		// すでに最短距離が確定している場合
+		if confirm[position] {
+			continue
+		}
+		// 距離の最新値と異なる場合
 		if dist[position] != edge.Weight {
 			continue
 		}
+
+		// 最短距離確定を更新する
+		confirm[position] = true
+		// 隣接しているノードをループする
 		for _, p := range graph[position] {
+			// 次のノード, 1~positionまでの最短距離 + 現在のノードから次ぎのノードにいくコスト
 			to, weight := p.To, dist[position]+p.Weight
-			if dist[to] <= weight {
-				continue
+			// 現在のノードから行った場合に、他のノードから行った場合より距離が短い場合
+			if dist[to] > weight {
+				// 最短距離リスト更新
+				dist[to] = weight
+				// 確定候補キューに格納
+				heap.Push(h, Edge{Weight: dist[to], To: to, idx: p.idx})
 			}
-			dist[to] = weight
-			heap.Push(h, Edge{Weight: dist[to], To: to})
 		}
 	}
 	return dist
 }
 
 func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
+	/* ダイクストラ法 */
+	// 最短距離が確定したかどうかのリスト
+	confirm := make([]bool, N+1)
+	// 最短距離リスト
 	dist := make([]int, N+1)
 	for i := 0; i <= N; i++ {
 		dist[i] = MaxInt
 	}
+	// 経路を保存するためのリスト
 	from := make([]int, N+1)
 	for i := 0; i <= N; i++ {
 		from[i] = -1
 	}
+	// スタート地点をキューに追加
 	dist[start] = 0
 	h := &EdgeHeap{
 		{To: start, Weight: 0},
 	}
 	heap.Init(h)
+	// ダイクストラ法
+	// 確定候補から一番最短距離が近いとこを確定させていくのに
+	// 毎回ループで探すのは大変なため
+	// ヒープキューで最小ノードを取り出していく
+	// (確定候補がなくなったら終了)
 	for h.Len() > 0 {
+		// ヒープからキュー取得
 		edge := heap.Pop(h).(Edge)
+
+		// 次に確定させるべき頂点を求める
 		position := edge.To
+		// すでに最短距離が確定している場合
+		if confirm[position] {
+			continue
+		}
+		// 距離の最新値と異なる場合
 		if dist[position] != edge.Weight {
 			continue
 		}
+
+		// 最短距離確定を更新する
+		confirm[position] = true
+		// 隣接しているノードをループする
 		for _, p := range graph[position] {
+			// 次のノード, 1~positionまでの最短距離 + 現在のノードから次ぎのノードにいくコスト
 			to, weight := p.To, dist[position]+p.Weight
-			if dist[to] <= weight {
-				continue
+			// 現在のノードから行った場合に、他のノードから行った場合より距離が短い場合
+			if dist[to] > weight {
+				// 最短距離リスト更新
+				dist[to] = weight
+				// 確定候補キューに格納
+				heap.Push(h, Edge{Weight: dist[to], To: to})
+				// 経路リスト更新
+				from[to] = position
 			}
-			dist[to] = weight
-			heap.Push(h, Edge{Weight: dist[to], To: to})
-			from[to] = position
 		}
 	}
 	return dist, from
 }
 
 type Edge struct {
-	To     int
-	Weight int
+	To     int // 次に移動できるノード
+	Weight int // 移動にかかる重み(コスト)
+	idx    int
 }
 type EdgeHeap []Edge
 

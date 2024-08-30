@@ -14,7 +14,24 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ni()
+	g := make([][]Edge, n)
+	for i := 0; i < n; i++ {
+		g[i] = make([]Edge, 0)
+	}
+	for i := 0; i < n-1; i++ {
+		a, b, x := ni3()
+		x--
+		g[i] = append(g[i], Edge{
+			To:     i + 1,
+			Weight: a,
+		})
+		g[i] = append(g[i], Edge{
+			To:     x,
+			Weight: b,
+		})
+	}
+	out.Println(dijkstra(n, 0, g)[n-1])
 }
 
 const bufsize = 4 * 1024 * 1024
