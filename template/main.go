@@ -600,6 +600,24 @@ func nextPermutation(aa []int) bool {
 	return true
 }
 
+// SegTreeLazy
+// example:
+// ex := X{0}
+//
+//	fx := func(a, b X) X {
+//		return X{max(a.val, b.val)}
+//	}
+//
+// em := M{0}
+//
+//	fm := func(a, b M) M {
+//		return M{a.val + b.val}
+//	}
+//	fa := func(a X, b M) X {
+//		return X{a.val + b.val}
+//	}
+//
+// seg := NewSegTreeLazy(n, ex, em, fx, fm, fa)
 type SegTreeLazy struct {
 	Size int
 	Ex   X  // identity element in monoid X
