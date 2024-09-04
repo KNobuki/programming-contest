@@ -14,7 +14,61 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := ni2()
+	dist := make([][]int, n)
+	for i := 0; i < n; i++ {
+		dist[i] = make([]int, n)
+		for j := 0; j < n; j++ {
+			dist[i][j] = MaxInt / 10
+		}
+		dist[i][i] = 0
+	}
+	type bridge struct {
+		from, to, t int
+	}
+	bridges := make([]bridge, m)
+	for i := 0; i < m; i++ {
+		a := bridge{
+			from: ni() - 1,
+			to:   ni() - 1,
+			t:    ni(),
+		}
+		bridges[i] = a
+		dist[a.from][a.to] = min(dist[a.from][a.to], a.t)
+		dist[a.to][a.from] = min(dist[a.to][a.from], a.t)
+	}
+	for k := 0; k < n; k++ {
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				dist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j])
+			}
+		}
+	}
+	for q := ni(); q > 0; q-- {
+		k := ni()
+		b := nis(k)
+		for i := 0; i < k; i++ {
+			b[i]--
+		}
+		ans := MaxInt
+		for ns, a := true, genPerm(k); ns; ns = nextPermutation(a) {
+			for bit := 0; bit < 1<<k; bit++ {
+				sum := 0
+				cur := 0
+				for i := 0; i < k; i++ {
+					from, to, t := bridges[b[a[i]]].from, bridges[b[a[i]]].to, bridges[b[a[i]]].t
+					if bit&(1<<i) > 0 {
+						from, to = to, from
+					}
+					sum += dist[cur][from] + t
+					cur = to
+				}
+				sum += dist[cur][n-1]
+				ans = min(ans, sum)
+			}
+		}
+		out.Println(ans)
+	}
 }
 
 const bufsize = 4 * 1024 * 1024

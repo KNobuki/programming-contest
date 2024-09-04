@@ -14,7 +14,23 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ni()
+	a := nis(n)
+	l := 0
+	ans := n
+	nc2 := func(n int) int {
+		return n * (n - 1) / 2
+	}
+	for l < n-1 {
+		r := l + 1
+		d := a[r] - a[l]
+		for r+1 < n && a[r+1]-a[r] == d {
+			r++
+		}
+		ans += nc2(r - l + 1)
+		l = r
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -575,7 +591,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns, a := true, genPerm(k); ns; ns = nextPermutation(a)
+// example: for ns := true; ns; ns = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
@@ -598,17 +614,6 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
-}
-
-func genPerm(size int) []int {
-	if size < 0 {
-		panic("genPerm: size is negative")
-	}
-	ret := make([]int, size)
-	for i := 0; i < size; i++ {
-		ret[i] = i
-	}
-	return ret
 }
 
 // SegTreeLazy

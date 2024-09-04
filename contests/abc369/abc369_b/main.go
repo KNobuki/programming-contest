@@ -14,7 +14,35 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ni()
+	ls, rs := make([]int, 0, n), make([]int, 0, n)
+	for i := 0; i < n; i++ {
+		a := ni()
+		s := ns()
+		switch s {
+		case "L":
+			ls = append(ls, a)
+		case "R":
+			rs = append(rs, a)
+		}
+	}
+	l, r := 0, 0
+	if len(ls) > 0 {
+		l = ls[0]
+	}
+	if len(rs) > 0 {
+		r = rs[0]
+	}
+	ans := 0
+	for i := 1; i < len(ls); i++ {
+		ans += abs(l - ls[i])
+		l = ls[i]
+	}
+	for i := 1; i < len(rs); i++ {
+		ans += abs(r - rs[i])
+		r = rs[i]
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -575,7 +603,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns, a := true, genPerm(k); ns; ns = nextPermutation(a)
+// example: for ns := true; ns; ns = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
@@ -598,17 +626,6 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
-}
-
-func genPerm(size int) []int {
-	if size < 0 {
-		panic("genPerm: size is negative")
-	}
-	ret := make([]int, size)
-	for i := 0; i < size; i++ {
-		ret[i] = i
-	}
-	return ret
 }
 
 // SegTreeLazy

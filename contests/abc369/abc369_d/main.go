@@ -14,7 +14,17 @@ import (
 
 // 解答欄
 func solve() {
-
+	n := ni()
+	a := nis(n)
+	// dp[i][0] i番目が偶数回目である場合の最大値
+	// dp[i][1] i番目が奇数回目である場合の最大値
+	dp := make([][2]int, n)
+	dp[0][1] = a[0]
+	for i := 1; i < n; i++ {
+		dp[i][0] = max(dp[i-1][0], dp[i-1][1]+2*a[i])
+		dp[i][1] = max(dp[i-1][1], dp[i-1][0]+a[i])
+	}
+	out.Println(max(dp[n-1][0], dp[n-1][1]))
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -575,7 +585,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns, a := true, genPerm(k); ns; ns = nextPermutation(a)
+// example: for ns := true; ns; ns = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
@@ -598,17 +608,6 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
-}
-
-func genPerm(size int) []int {
-	if size < 0 {
-		panic("genPerm: size is negative")
-	}
-	ret := make([]int, size)
-	for i := 0; i < size; i++ {
-		ret[i] = i
-	}
-	return ret
 }
 
 // SegTreeLazy

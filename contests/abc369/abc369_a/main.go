@@ -14,7 +14,16 @@ import (
 
 // 解答欄
 func solve() {
-
+	a, b := ni2()
+	if a == b {
+		out.Println(1)
+		return
+	}
+	if abs(a-b)%2 == 1 {
+		out.Println(2)
+		return
+	}
+	out.Println(3)
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -575,7 +584,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns, a := true, genPerm(k); ns; ns = nextPermutation(a)
+// example: for ns := true; ns; ns = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
@@ -598,17 +607,6 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
-}
-
-func genPerm(size int) []int {
-	if size < 0 {
-		panic("genPerm: size is negative")
-	}
-	ret := make([]int, size)
-	for i := 0; i < size; i++ {
-		ret[i] = i
-	}
-	return ret
 }
 
 // SegTreeLazy

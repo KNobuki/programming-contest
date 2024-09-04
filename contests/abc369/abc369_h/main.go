@@ -575,7 +575,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns, a := true, genPerm(k); ns; ns = nextPermutation(a)
+// example: for ns := true; ns; ns = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
@@ -598,17 +598,6 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
-}
-
-func genPerm(size int) []int {
-	if size < 0 {
-		panic("genPerm: size is negative")
-	}
-	ret := make([]int, size)
-	for i := 0; i < size; i++ {
-		ret[i] = i
-	}
-	return ret
 }
 
 // SegTreeLazy
