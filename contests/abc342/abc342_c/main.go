@@ -14,18 +14,7 @@ import (
 
 // 解答欄
 func solve() {
-	n, m, k := ni3()
-	l := lcm(n, m)
-	ng, ok := 0, int(2e18)
-	for ok-ng > 1 {
-		mid := (ng + ok) / 2
-		if mid/n+mid/m-(mid/l)*2 >= k {
-			ok = mid
-		} else {
-			ng = mid
-		}
-	}
-	out.Println(ok)
+
 }
 
 const bufsize = 4 * 1024 * 1024

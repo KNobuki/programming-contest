@@ -14,18 +14,35 @@ import (
 
 // 解答欄
 func solve() {
-	n, m, k := ni3()
-	l := lcm(n, m)
-	ng, ok := 0, int(2e18)
-	for ok-ng > 1 {
-		mid := (ng + ok) / 2
-		if mid/n+mid/m-(mid/l)*2 >= k {
-			ok = mid
-		} else {
-			ng = mid
+	n := ni()
+	a := nis(n)
+	m := make(map[int]int)
+	ans := 0
+	for i := 0; i < n; i++ {
+		if a[i] == 0 {
+			ans += i
+			m[0]++
+			continue
 		}
+		b := a[i]
+		c := 1
+		for j := 2; j*j <= a[i]; j++ {
+			cnt := 0
+			for b%j == 0 {
+				b /= j
+				cnt++
+			}
+			if cnt%2 == 1 {
+				c *= j
+			}
+		}
+		if b != 1 {
+			c *= b
+		}
+		ans += m[c] + m[0]
+		m[c]++
 	}
-	out.Println(ok)
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
