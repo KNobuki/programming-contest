@@ -14,7 +14,73 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, m := ni2()
+	g := make([][]int, n)
+	f := make([]int, n)
+	f[n-1] = MaxInt
+	type ldkc struct {
+		l, d, k, c int
+	}
+	ldkcs := make([]map[int][]ldkc, n)
+	for i := 0; i < n; i++ {
+		ldkcs[i] = make(map[int][]ldkc)
+	}
+	h := &EdgeHeap{}
+	heap.Init(h)
+	for i := 0; i < m; i++ {
+		l, d, k, c := ni4()
+		a, b := ni2()
+		a--
+		b--
+		g[b] = append(g[b], a)
+		if _, ok := ldkcs[a][b]; !ok {
+			ldkcs[a][b] = make([]ldkc, 0)
+		}
+		ldkcs[a][b] = append(ldkcs[a][b], ldkc{
+			l: l,
+			d: d,
+			k: k,
+			c: c,
+		})
+		if b == n-1 && f[a] < l+(k-1)*d {
+			f[a] = l + (k-1)*d
+			heap.Push(h, Edge{
+				To:     a,
+				Weight: f[a],
+			})
+		}
+	}
+	for h.Len() > 0 {
+		now := heap.Pop(h).(Edge)
+		if f[now.To] != now.Weight {
+			continue
+		}
+		for _, next := range g[now.To] {
+			if next == n-1 {
+				continue
+			}
+			for _, v := range ldkcs[next][now.To] {
+				if v.l+v.c > f[now.To] {
+					continue
+				}
+				k := min((f[now.To]-(v.l+v.c))/v.d, v.k-1)
+				if v.l+k*v.d > f[next] {
+					f[next] = v.l + k*v.d
+					heap.Push(h, Edge{
+						To:     next,
+						Weight: f[next],
+					})
+				}
+			}
+		}
+	}
+	for i := 0; i < n-1; i++ {
+		if f[i] == 0 {
+			out.Println("Unreachable")
+		} else {
+			out.Println(f[i])
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
@@ -444,7 +510,7 @@ type Edge struct {
 type EdgeHeap []Edge
 
 func (h EdgeHeap) Len() int           { return len(h) }
-func (h EdgeHeap) Less(i, j int) bool { return h[i].Weight < h[j].Weight }
+func (h EdgeHeap) Less(i, j int) bool { return h[i].Weight > h[j].Weight }
 func (h EdgeHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 // Push データ格納
@@ -575,7 +641,7 @@ func New2DIntArray(n, m, init int) [][]int {
 }
 
 // nextPermutation
-// example: for ns := true; ns; ns = nextPermutation(a)
+// example: for ns, a := true, genPerm(k); ns; ns = nextPermutation(a)
 func nextPermutation(aa []int) bool {
 	n := len(aa)
 	l := n - 2
@@ -598,6 +664,195 @@ func nextPermutation(aa []int) bool {
 		r--
 	}
 	return true
+}
+
+func genPerm(size int) []int {
+	if size < 0 {
+		panic("genPerm: size is negative")
+	}
+	ret := make([]int, size)
+	for i := 0; i < size; i++ {
+		ret[i] = i
+	}
+	return ret
+}
+
+// SegTree
+// example:
+//
+//	a := make([]int, n-1)
+//	op := func(a, b int) int {
+//		return a * b
+//	}
+//	e := func() int {
+//		return 1
+//	}
+//	seg := NewSegTreeFromSlice(op, e, a)
+type SegTree[T any] struct {
+	n, size, log int
+	d            []T
+	op           func(a, b T) T
+	e            func() T
+}
+
+func (s *SegTree[T]) update(k int) {
+	s.d[k] = s.op(s.d[2*k], s.d[2*k+1])
+}
+
+func NewSegTree[T any](op func(a, b T) T, e func() T, n int) *SegTree[T] {
+	v := make([]T, n)
+	for i := 0; i < n; i++ {
+		v[i] = e()
+	}
+	return NewSegTreeFromSlice(op, e, v)
+}
+
+func CeilPow2(n int) int {
+	x := 0
+	for (uint(1) << x) < uint(n) {
+		x++
+	}
+	return x
+}
+
+func NewSegTreeFromSlice[T any](op func(a, b T) T, e func() T, v []T) *SegTree[T] {
+	n := len(v)
+	log := CeilPow2(n)
+	size := 1 << log
+	d := make([]T, 2*size)
+	for i := 0; i < 2*size; i++ {
+		d[i] = e()
+	}
+	for i := 0; i < n; i++ {
+		d[size+i] = v[i]
+	}
+	for i := size - 1; i >= 1; i-- {
+		d[i] = op(d[2*i], d[2*i+1])
+	}
+
+	return &SegTree[T]{
+		n:    n,
+		size: size,
+		log:  log,
+		d:    d,
+		op:   op,
+		e:    e,
+	}
+}
+
+func (s *SegTree[T]) Set(p int, x T) {
+	if p < 0 || s.n <= p {
+		panic("")
+	}
+	p += s.size
+	s.d[p] = x
+	for i := 1; i <= s.log; i++ {
+		s.update(p >> i)
+	}
+}
+
+func (s *SegTree[T]) Get(p int) T {
+	if p < 0 || s.n <= p {
+		panic("")
+	}
+	return s.d[p+s.size]
+}
+
+func (s *SegTree[T]) Prod(l, r int) T {
+	if l < 0 || r < l || s.n < r {
+		panic("")
+	}
+	sml, smr := s.e(), s.e()
+	l += s.size
+	r += s.size
+
+	for l < r {
+		if l&1 > 0 {
+			sml = s.op(sml, s.d[l])
+			l++
+		}
+		if r&1 > 0 {
+			r--
+			smr = s.op(s.d[r], smr)
+		}
+		l >>= 1
+		r >>= 1
+	}
+	return s.op(sml, smr)
+}
+
+func (s *SegTree[T]) AllProd() T {
+	return s.d[1]
+}
+
+func (s *SegTree[T]) MaxRight(l int, f func(x T) bool) int {
+	if l < 0 || s.n < l {
+		panic("")
+	}
+	if !f(s.e()) {
+		panic("")
+	}
+	if l == s.n {
+		return s.n
+	}
+	l += s.size
+	sm := s.e()
+	for {
+		for l%2 == 0 {
+			l >>= 1
+		}
+		if !f(s.op(sm, s.d[l])) {
+			for l < s.size {
+				l = 2 * l
+				if f(s.op(sm, s.d[l])) {
+					sm = s.op(sm, s.d[l])
+					l++
+				}
+			}
+			return l - s.size
+		}
+		sm = s.op(sm, s.d[l])
+		l++
+		if (l & -l) == l {
+			break
+		}
+	}
+	return s.n
+}
+
+func (s *SegTree[T]) MinLeft(r int, f func(x T) bool) int {
+	if r < 0 || s.n < r {
+		panic("")
+	}
+	if !f(s.e()) {
+		panic("")
+	}
+	if r == 0 {
+		return 0
+	}
+	r += s.size
+	sm := s.e()
+	for {
+		r--
+		for r > 1 && r%2 == 1 {
+			r >>= 1
+		}
+		if !f(s.op(s.d[r], sm)) {
+			for r < s.size {
+				r = 2*r + 1
+				if f(s.op(s.d[r], sm)) {
+					sm = s.op(s.d[r], sm)
+					r--
+				}
+			}
+			return r + 1 - s.size
+		}
+		sm = s.op(s.d[r], sm)
+		if (r & -r) == r {
+			break
+		}
+	}
+	return 0
 }
 
 // SegTreeLazy

@@ -14,7 +14,23 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, s := ni(), ns()
+	m := make([]uint8, 26)
+	for i := 0; i < 26; i++ {
+		m[i] = 'a' + uint8(i)
+	}
+	for q := ni(); q > 0; q-- {
+		c, d := ns()[0], ns()[0]
+		for i := 0; i < 26; i++ {
+			if m[i] == c {
+				m[i] = d
+			}
+		}
+	}
+	for i := 0; i < n; i++ {
+		out.Printf("%c", m[s[i]-'a'])
+	}
+	out.Println()
 }
 
 const bufsize = 4 * 1024 * 1024
