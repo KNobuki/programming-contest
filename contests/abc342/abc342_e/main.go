@@ -15,16 +15,9 @@ import (
 // 解答欄
 func solve() {
 	n, m := ni2()
-	g := make([][]int, n)
+	g := make([][]Edge, n)
 	f := make([]int, n)
-	f[n-1] = MaxInt
-	type ldkc struct {
-		l, d, k, c int
-	}
-	ldkcs := make([]map[int][]ldkc, n)
-	for i := 0; i < n; i++ {
-		ldkcs[i] = make(map[int][]ldkc)
-	}
+	f[n-1] = MaxInt / 2
 	h := &EdgeHeap{}
 	heap.Init(h)
 	for i := 0; i < m; i++ {
@@ -32,46 +25,36 @@ func solve() {
 		a, b := ni2()
 		a--
 		b--
-		g[b] = append(g[b], a)
-		if _, ok := ldkcs[a][b]; !ok {
-			ldkcs[a][b] = make([]ldkc, 0)
-		}
-		ldkcs[a][b] = append(ldkcs[a][b], ldkc{
-			l: l,
-			d: d,
-			k: k,
-			c: c,
+		g[b] = append(g[b], Edge{
+			To: a,
+			ldkc: ldkc{
+				l: l,
+				d: d,
+				k: k,
+				c: c,
+			},
 		})
-		if b == n-1 && f[a] < l+(k-1)*d {
-			f[a] = l + (k-1)*d
-			heap.Push(h, Edge{
-				To:     a,
-				Weight: f[a],
-			})
-		}
 	}
+	heap.Push(h, Edge{To: n - 1, Weight: MaxInt / 2})
 	for h.Len() > 0 {
 		now := heap.Pop(h).(Edge)
 		if f[now.To] != now.Weight {
 			continue
 		}
 		for _, next := range g[now.To] {
-			if next == n-1 {
+			l, d, k, c := next.ldkc.l, next.ldkc.d, next.ldkc.k, next.ldkc.c
+			if l+c > f[now.To] {
 				continue
 			}
-			for _, v := range ldkcs[next][now.To] {
-				if v.l+v.c > f[now.To] {
-					continue
-				}
-				k := min((f[now.To]-(v.l+v.c))/v.d, v.k-1)
-				if v.l+k*v.d > f[next] {
-					f[next] = v.l + k*v.d
-					heap.Push(h, Edge{
-						To:     next,
-						Weight: f[next],
-					})
-				}
+			lastTime := l + min((f[now.To]-(l+c))/d, k-1)*d
+			if lastTime <= f[next.To] {
+				continue
 			}
+			f[next.To] = lastTime
+			heap.Push(h, Edge{
+				To:     next.To,
+				Weight: f[next.To],
+			})
 		}
 	}
 	for i := 0; i < n-1; i++ {
@@ -503,9 +486,14 @@ func dijkstraWithPath(N int, start int, graph [][]Edge) ([]int, []int) {
 	return dist, from
 }
 
+type ldkc struct {
+	l, d, k, c int
+}
+
 type Edge struct {
 	To     int
 	Weight int
+	ldkc
 }
 type EdgeHeap []Edge
 
