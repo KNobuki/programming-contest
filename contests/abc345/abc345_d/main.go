@@ -14,7 +14,67 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, h, w := ni3()
+	rects := make([][2]int, n)
+	for i := 0; i < n; i++ {
+		rects[i][0], rects[i][1] = ni2()
+	}
+	check := func(a [][]bool) (int, int, bool) {
+		for i := 0; i < len(a); i++ {
+			for j := 0; j < len(a[i]); j++ {
+				if !a[i][j] {
+					return i, j, true
+				}
+			}
+		}
+		return 0, 0, false
+	}
+	for bit := 1; bit < 1<<n; bit++ {
+		sum := 0
+		targets := make([][2]int, 0, n)
+		for i := 0; i < n; i++ {
+			if bit&(1<<i) > 0 {
+				sum += rects[i][0] * rects[i][1]
+				targets = append(targets, [2]int{rects[i][0], rects[i][1]})
+			}
+		}
+		if sum != h*w {
+			continue
+		}
+		for ns, a := true, genPerm(len(targets)); ns; ns = nextPermutation(a) {
+			for bit2 := 0; bit2 < 1<<len(targets); bit2++ {
+				area := make([][]bool, h)
+				for i := 0; i < h; i++ {
+					area[i] = make([]bool, w)
+				}
+				f1 := true
+				for i, nowy, nowx := 0, 0, 0; i < len(targets); i++ {
+					nowh, noww := targets[a[i]][0], targets[a[i]][1]
+					if bit2&(1<<i) > 0 {
+						nowh, noww = noww, nowh
+					}
+					if nowy+nowh > h || nowx+noww > w {
+						f1 = false
+						break
+					}
+					for y := 0; y < nowh; y++ {
+						for x := 0; x < noww; x++ {
+							area[nowy+y][nowx+x] = true
+						}
+					}
+					nowy, nowx, _ = check(area)
+				}
+				if !f1 {
+					continue
+				}
+				if _, _, found := check(area); !found {
+					out.YesNo(true)
+					return
+				}
+			}
+		}
+	}
+	out.YesNo(false)
 }
 
 const bufsize = 4 * 1024 * 1024
