@@ -14,10 +14,23 @@ import (
 
 // 解答欄
 func solve() {
-	//n := ni()
-	//s := ns()
-	//c := nis(n)
-
+	n := ni()
+	s := []byte(ns())
+	for i := 0; i < n; i++ {
+		s[i] -= '0'
+	}
+	c := nis(n)
+	dp := make([][2][2]int, n)
+	dp[0][0][1-s[0]] = c[0]
+	dp[0][1][0] = MaxInt
+	dp[0][1][1] = MaxInt
+	for i := 1; i < n; i++ {
+		dp[i][0][s[i]] = dp[i-1][0][1-s[i]]
+		dp[i][0][1-s[i]] = dp[i-1][0][s[i]] + c[i]
+		dp[i][1][s[i]] = min(dp[i-1][0][s[i]], dp[i-1][1][1-s[i]])
+		dp[i][1][1-s[i]] = min(dp[i-1][0][1-s[i]], dp[i-1][1][s[i]]) + c[i]
+	}
+	out.Println(min(dp[n-1][1][0], dp[n-1][1][1]))
 }
 
 const bufsize = 4 * 1024 * 1024

@@ -14,7 +14,16 @@ import (
 
 // 解答欄
 func solve() {
-
+	n, k := ni2()
+	a := nis(n)
+	ans := (k + 1) * k / 2
+	for _, v := range uniqueInts(a) {
+		if v > k {
+			continue
+		}
+		ans -= v
+	}
+	out.Println(ans)
 }
 
 const bufsize = 4 * 1024 * 1024
