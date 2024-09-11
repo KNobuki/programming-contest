@@ -14,7 +14,52 @@ import (
 
 // 解答欄
 func solve() {
-
+	h, w, m := ni3()
+	type query struct {
+		t, a, x int
+	}
+	queries := make([]query, m)
+	for i := 0; i < m; i++ {
+		queries[i].t, queries[i].a, queries[i].x = ni3()
+	}
+	rows := make([]bool, h)
+	rowRemaining := w
+	columns := make([]bool, w)
+	columnRemaining := h
+	ans := make([]int, 2e5+1)
+	zero := h * w
+	for i := m - 1; i >= 0; i-- {
+		t, a, x := queries[i].t, queries[i].a-1, queries[i].x
+		switch t {
+		case 1:
+			if !rows[a] {
+				rows[a] = true
+				ans[x] += rowRemaining
+				zero -= rowRemaining
+				columnRemaining--
+			}
+		case 2:
+			if !columns[a] {
+				columns[a] = true
+				ans[x] += columnRemaining
+				zero -= columnRemaining
+				rowRemaining--
+			}
+		}
+	}
+	k := 0
+	ans[0] += zero
+	for i := 0; i <= 2e5; i++ {
+		if ans[i] > 0 {
+			k++
+		}
+	}
+	out.Println(k)
+	for i := 0; i <= 2e5; i++ {
+		if ans[i] > 0 {
+			out.Println(i, ans[i])
+		}
+	}
 }
 
 const bufsize = 4 * 1024 * 1024
