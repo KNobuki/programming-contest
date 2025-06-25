@@ -16,7 +16,7 @@ import (
 func solve() {
 	n, q := ni2()
 	type edge struct {
-		s    string
+		s    []byte
 		prev *edge
 	}
 	start := &edge{}
@@ -31,20 +31,20 @@ func solve() {
 			edges[p] = edges[0]
 		case 2:
 			edges[p] = &edge{
-				s:    ns(),
+				s:    []byte(ns()),
 				prev: edges[p],
 			}
 		case 3:
 			edges[0] = edges[p]
 		}
 	}
-	reversed := ""
+	reversed := make([]byte, 0, 2e5)
 	now := edges[0]
 	for now != nil {
-		reversed += reverseString(now.s)
+		reversed = append(reversed, reverseBytes(now.s)...)
 		now = now.prev
 	}
-	out.Println(reverseString(reversed))
+	out.Println(string(reverseBytes(reversed)))
 }
 
 const bufsize = 4 * 1024 * 1024
