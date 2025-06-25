@@ -15,31 +15,31 @@ import (
 // 解答欄
 func solve() {
 	n, q := ni2()
-	type edge struct {
+	type node struct {
 		s    []byte
-		prev *edge
+		prev *node
 	}
-	start := &edge{}
-	edges := make([]*edge, n+1)
+	start := &node{}
+	nodes := make([]*node, n+1)
 	for i := 0; i < n+1; i++ {
-		edges[i] = start
+		nodes[i] = start
 	}
 	for ; q > 0; q-- {
 		c, p := ni2()
 		switch c {
 		case 1:
-			edges[p] = edges[0]
+			nodes[p] = nodes[0]
 		case 2:
-			edges[p] = &edge{
+			nodes[p] = &node{
 				s:    []byte(ns()),
-				prev: edges[p],
+				prev: nodes[p],
 			}
 		case 3:
-			edges[0] = edges[p]
+			nodes[0] = nodes[p]
 		}
 	}
 	reversed := make([]byte, 0, 2e5)
-	now := edges[0]
+	now := nodes[0]
 	for now != nil {
 		reversed = append(reversed, reverseBytes(now.s)...)
 		now = now.prev
