@@ -519,6 +519,19 @@ func reverseInts(a []int) []int {
 	return res
 }
 
+func reverseBytes(a []byte) []byte {
+	res := make([]byte, len(a))
+	copy(res, a)
+	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
+		res[i], res[j] = res[j], res[i]
+	}
+	return res
+}
+
+func reverseString(a string) string {
+	return string(reverseBytes([]byte(a)))
+}
+
 func eratosthenes(n int) []bool {
 	prime := make([]bool, n+1)
 	for i := 2; i <= n; i++ {
